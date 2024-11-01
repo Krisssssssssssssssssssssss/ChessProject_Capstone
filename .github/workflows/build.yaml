@@ -10,3 +10,4 @@ jobs:
           distribution: "temurin"
           cache: 'maven'
       - run: mvn package --batch-mode
+        working-directory: ./backend
