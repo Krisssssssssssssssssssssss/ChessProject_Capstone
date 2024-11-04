@@ -8,7 +8,7 @@ export default function RegisterUser() {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
         setError('');
         setSuccessMessage('');
@@ -28,6 +28,8 @@ export default function RegisterUser() {
             setSuccessMessage("User created successfully!");
             console.log("Response Data:", response.data);
         } catch (err) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             if (err.response && err.response.status === 409) {
                 console.log("Error: Username already exists");
                 setError("Username already exists. Please choose a different username.");
