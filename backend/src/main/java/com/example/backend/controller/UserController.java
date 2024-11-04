@@ -31,14 +31,16 @@ public class UserController {
     public UserModel getUser(@PathVariable String id) {
         return userService.getUserById(id);
     }
+
     @PutMapping("/{id}")
     public UserResponse editUser(@PathVariable String id, @RequestBody UserRequest userRequest) throws Exception {
         UserModel user = userRequest.toModel();
         user.setId(id);
         return UserResponse.from(userService.editUser(user));
     }
+
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable String id) {
-         userService.deleteUser(id);
+        userService.deleteUser(id);
     }
 }
