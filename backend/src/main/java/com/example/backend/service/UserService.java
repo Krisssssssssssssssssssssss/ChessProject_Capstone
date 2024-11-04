@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.UserRequest;
 import com.example.backend.exception.UserAlreadyExistsException;
 import com.example.backend.model.UserModel;
 import com.example.backend.repository.UserRepository;
@@ -32,13 +33,20 @@ public class UserService {
         return userRepository.save(userModel);
     }
 
-
     public List<UserModel> getAllUsers() {
         return userRepository.findAll();
     }
 
     public UserModel getUserById(String id) {
-        Optional<UserModel> user = userRepository.findById(id);
-        return user.orElse(null);
+        return userRepository.findById(id).orElseThrow();
+    }
+
+    public UserModel editUser(UserModel user) throws Exception {
+        userRepository.findById(user.getId()).orElseThrow();
+        return userRepository.save(user);
+    }
+
+    public void deleteUser(String id) {
+        userRepository.findById(id).ifPresent(userRepository::delete);
     }
 }
