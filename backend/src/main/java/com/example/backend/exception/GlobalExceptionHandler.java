@@ -1,4 +1,5 @@
 package com.example.backend.exception;
+
 import com.example.backend.dto.ErrorResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,6 +18,12 @@ import java.util.NoSuchElementException;
 @Log4j2
 public class GlobalExceptionHandler {
     private static final String GENERIC_ERROR_MESSAGE = "Something went wrong";
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
+        return new ErrorResponse(ex.getMessage());
+    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
