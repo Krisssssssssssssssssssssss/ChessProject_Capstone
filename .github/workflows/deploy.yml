@@ -3,7 +3,7 @@ name: "app"
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-frontend:
@@ -82,7 +82,7 @@ jobs:
     needs: push-to-docker-hub
     environment:
       name: Capstone Project # Capstone Project name
-      url: https://neuefische.de/ # Link to deployment
+      url: https://kristijans-chess-game # Link to deployment
     steps:
       - name: Trigger Render.com Deployment
         run: |
