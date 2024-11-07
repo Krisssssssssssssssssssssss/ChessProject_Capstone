@@ -7,17 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -29,6 +34,11 @@ class UserControllerTest {
     private static final String NAME_THIRD = "Jack";
 
     private static final String PASSWORD = "123456";
+
+    private SecurityMockMvcRequestPostProcessors.OidcLoginRequestPostProcessor mockUser() {
+        return oidcLogin().userInfoToken(token -> token
+                .claim("login", NAME_FIRST));
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,11 +55,12 @@ class UserControllerTest {
                                 """
                                               {
                                                 "name": "%s",
-                                                "password": "%s"
+                                                "password": "%s",
+                                                "isGitHubUser": "%s"
                                               }
-                                        """.formatted(NAME_FIRST, PASSWORD)
+                                        """.formatted(NAME_FIRST, PASSWORD, true)
                         )
-                )
+                        .with(mockUser()))
                 .andExpect(MockMvcResultMatchers.status().isOk());
         List<UserModel> users = userRepository.findAll();
         assertEquals(1, users.size());
@@ -65,11 +76,12 @@ class UserControllerTest {
                                 """
                                               {
                                                 "name": null,
-                                                "password": "%s"
+                                                "password": "%s",
+                                                "isGitHubUser": "%s"
                                               }
-                                        """.formatted(PASSWORD)
+                                        """.formatted(PASSWORD, true)
                         )
-                )
+                        .with(mockUser()))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
         List<UserModel> actualUsers = userRepository.findAll();
         List<UserModel> expectedUsers = List.of();
@@ -85,7 +97,7 @@ class UserControllerTest {
                         UserModel.builder().name(NAME_SECOND).build()
                 )
         );
-        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE))
+        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE).with(mockUser()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -101,7 +113,7 @@ class UserControllerTest {
         UserModel secondUser = UserModel.builder().name(NAME_SECOND).build();
 
         userRepository.saveAll(List.of(firstUser, secondUser));
-        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE + "/" + firstUser.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE + "/" + firstUser.getId()).with(mockUser()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.name").value(NAME_FIRST))
@@ -115,8 +127,35 @@ class UserControllerTest {
         UserModel secondUser = UserModel.builder().name(NAME_SECOND).build();
 
         userRepository.saveAll(List.of(firstUser));
-        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE + "/" + secondUser.getId()))
+        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE + "/" + secondUser.getId())
+                        .with(mockUser()))
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+
+    @Test
+    @DirtiesContext
+    void getUser_byName_sucess() throws Exception {
+        UserModel firstUser = UserModel.builder().name(NAME_FIRST).build();
+        UserModel secondUser = UserModel.builder().name(NAME_SECOND).build();
+
+        userRepository.saveAll(List.of(firstUser, secondUser));
+        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE + "/find_by_name/" + firstUser.getName()).with(mockUser()))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.name").value(NAME_FIRST))
+                .andExpect(jsonPath("$.id").value(firstUser.getId()));
+    }
+
+    @Test
+    @DirtiesContext
+    void getUser_byName_NonExistantName() throws Exception {
+        UserModel firstUser = UserModel.builder().name(NAME_FIRST).build();
+        UserModel secondUser = UserModel.builder().name(NAME_SECOND).build();
+
+        userRepository.saveAll(List.of(firstUser));
+        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE + "/find_by_name/" + secondUser.getName())
+                        .with(mockUser()))
+                .andExpect(MockMvcResultMatchers.content().string(""));
     }
 
     @Test
@@ -132,11 +171,13 @@ class UserControllerTest {
                                 """
                                               {
                                                 "name": "%s",
-                                                "password": "%s"
+                                                "password": "%s",
+                                                "isGitHubUser": "%s"
                                               }
-                                        """.formatted(NAME_THIRD, PASSWORD)
+                                        """.formatted(NAME_THIRD, PASSWORD, true)
                         )
-                ).andExpect(MockMvcResultMatchers.status().isOk())
+                        .with(mockUser()))
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.name").value(NAME_THIRD))
                 .andExpect(jsonPath("$.id").value(firstUser.getId()));
@@ -155,11 +196,12 @@ class UserControllerTest {
                         """
                                       {
                                         "name": "%s",
-                                        "password": "%s"
+                                        "password": "%s",
+                                        "isGitHubUser": "%s"
                                       }
-                                """.formatted(NAME_THIRD, PASSWORD)
+                                """.formatted(NAME_THIRD, PASSWORD, true)
                 )
-        ).andExpect(MockMvcResultMatchers.status().is4xxClientError());
+                .with(mockUser())).andExpect(MockMvcResultMatchers.status().is4xxClientError());
 
         mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -178,9 +220,9 @@ class UserControllerTest {
         userRepository.saveAll(List.of(firstUser, secondUser));
 
         mockMvc.perform(MockMvcRequestBuilders.delete(URL_BASE + "/" + firstUser.getId())
-        ).andExpect(MockMvcResultMatchers.status().isOk());
+                .with(mockUser())).andExpect(MockMvcResultMatchers.status().isOk());
 
-        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE))
+        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE).with(mockUser()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -196,9 +238,9 @@ class UserControllerTest {
         userRepository.saveAll(List.of(firstUser, secondUser));
 
         mockMvc.perform(MockMvcRequestBuilders.delete(URL_BASE + "/" + "A12345678WWW")
-        ).andExpect(MockMvcResultMatchers.status().isOk());
+                .with(mockUser())).andExpect(MockMvcResultMatchers.status().isOk());
 
-        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE))
+        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE).with(mockUser()))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
