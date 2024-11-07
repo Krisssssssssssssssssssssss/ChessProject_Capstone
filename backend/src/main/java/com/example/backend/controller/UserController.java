@@ -32,6 +32,11 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    @GetMapping("/find_by_name/{name}")
+    public UserModel getUserbyName(@PathVariable String name) {
+        return userService.getUserByName(name);
+    }
+
     @PutMapping("/{id}")
     public UserResponse editUser(@PathVariable String id, @RequestBody UserRequest userRequest) throws Exception {
         UserModel user = userRequest.toModel();
@@ -42,5 +47,11 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
+    }
+
+    @GetMapping("/login")
+    public UserResponse getUserByLogin(@RequestBody UserRequest userRequest) {
+        UserModel user = userRequest.toModel();
+        return UserResponse.from(userService.getUserByName_and_Password(user));
     }
 }

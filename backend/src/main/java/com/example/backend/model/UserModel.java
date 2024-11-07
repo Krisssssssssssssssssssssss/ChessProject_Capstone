@@ -17,4 +17,5 @@ public class UserModel {
     private String password;
     private String rating;
     private Boolean isAdmin;
+    private Boolean isGitHubUser;
 }
