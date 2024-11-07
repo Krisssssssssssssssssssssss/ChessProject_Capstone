@@ -30,6 +30,10 @@ export default function Home({userName, setUserName}: HomeProps) {
         }
     };
 
+    const generateRandomPassword = (length: number) => {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+        return Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
+    };
 
     const createUserIfNotExists = async (name: string) => {
         try {
@@ -43,7 +47,7 @@ export default function Home({userName, setUserName}: HomeProps) {
 
             const newUserResponse = await axios.post<UserResponse>('/api/users', {
                 name,
-                password: "password",
+                password: generateRandomPassword(12),
                 isGitHubUser: true
             });
             setUserName(newUserResponse.data.name);

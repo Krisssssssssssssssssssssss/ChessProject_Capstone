@@ -94,7 +94,13 @@ export default function RegisterUser() {
             </div>
             <div className={"noAccount_PleaseRegister"}>
                 <p>Registering was successful? Click
-                    <a className={"RegisterSpan"} onClick={handleNavigate}> here </a>
+                    <a className="RegisterSpan"
+                       onClick={handleNavigate}
+                       tabIndex={0}
+                       onKeyDown={(e) => {
+                           if (e.key === 'Enter') handleNavigate();
+                       }}
+                       role="button" > here </a>
                     to go to the login page
                 </p>
             </div>

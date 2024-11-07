@@ -78,7 +78,13 @@ export default function Login({userName, setUserName}: LoginProps) {
                 </div>
                 <div className="noAccount_PleaseRegister">
                     <p>Don't have an account yet? Click
-                        <span className="RegisterSpan" onClick={handleNavigate}> here </span>
+                        <a className="RegisterSpan"
+                            onClick={handleNavigate}
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleNavigate();
+                            }}
+                            role="button"> here </a>
                         to register.
                     </p>
                 </div>

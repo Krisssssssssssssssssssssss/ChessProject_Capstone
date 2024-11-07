@@ -21,27 +21,28 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/**") // Disable CSRF for API endpoints
+                        .ignoringRequestMatchers("/api/**")
+                        .requireCsrfProtectionMatcher(request -> request.getMethod().equals("POST") && !request.getServletPath().startsWith("/api"))
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/me").permitAll()       // Allow access to /me without OAuth session
-                        .requestMatchers("/api/users").permitAll()          // Allow public access for registration
-                        .requestMatchers("/api/users/**").authenticated()   // Secure user operations
-                        .requestMatchers("/api/**").authenticated()         // Secure all other API endpoints
-                        .anyRequest().permitAll()                           // Allow public access to all other endpoints
+                        .requestMatchers("/api/auth/me").permitAll()
+                        .requestMatchers("/api/users").permitAll()
+                        .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Use session for OAuth2
+                        session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 )
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) // Unauthorized handler
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
                 .oauth2Login(oauth -> oauth
-                        .defaultSuccessUrl(appUrl) // Redirect to app URL on OAuth2 success
+                        .defaultSuccessUrl(appUrl)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
-                        .logoutSuccessUrl(appUrl) // Redirect to app URL on logout
+                        .logoutSuccessUrl(appUrl)
                 );
         return http.build();
     }
