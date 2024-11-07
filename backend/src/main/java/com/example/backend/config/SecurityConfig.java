@@ -9,8 +9,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-
 
 @Configuration
 @EnableWebSecurity
@@ -23,15 +21,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // CSRF for web clients
-                        .ignoringRequestMatchers("/api/**") // Bypass CSRF for specific API endpoints
+                        .ignoringRequestMatchers("/api/**") // Disable CSRF for API endpoints
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/me").permitAll()
-                        .requestMatchers("/api/users").permitAll()
-                        .requestMatchers("/api/users/**").authenticated()
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/api/auth/me").permitAll()       // Allow access to /me without OAuth session
+                        .requestMatchers("/api/users").permitAll()          // Allow public access for registration
+                        .requestMatchers("/api/users/**").authenticated()   // Secure user operations
+                        .requestMatchers("/api/**").authenticated()         // Secure all other API endpoints
+                        .anyRequest().permitAll()                           // Allow public access to all other endpoints
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Use session for OAuth2
