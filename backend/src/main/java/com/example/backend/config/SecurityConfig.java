@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+
 
 @Configuration
 @EnableWebSecurity
@@ -21,8 +23,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/**")
-                        .requireCsrfProtectionMatcher(request -> request.getMethod().equals("POST") && !request.getServletPath().startsWith("/api"))
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // CSRF for web clients
+                        .ignoringRequestMatchers("/api/**") // Bypass CSRF for specific API endpoints
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/me").permitAll()
@@ -32,17 +34,17 @@ public class SecurityConfig {
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                        session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Use session for OAuth2
                 )
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) // Unauthorized handler
                 )
                 .oauth2Login(oauth -> oauth
-                        .defaultSuccessUrl(appUrl)
+                        .defaultSuccessUrl(appUrl) // Redirect to app URL on OAuth2 success
                 )
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
-                        .logoutSuccessUrl(appUrl)
+                        .logoutSuccessUrl(appUrl) // Redirect to app URL on logout
                 );
         return http.build();
     }

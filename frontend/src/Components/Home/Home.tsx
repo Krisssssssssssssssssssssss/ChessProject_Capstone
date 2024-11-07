@@ -32,7 +32,11 @@ export default function Home({userName, setUserName}: HomeProps) {
 
     const generateRandomPassword = (length: number) => {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
-        return Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
+        const charactersLength = characters.length;
+        const array = new Uint32Array(length);
+        crypto.getRandomValues(array); // Generates cryptographically secure random values
+
+        return Array.from(array, (num) => characters.charAt(num % charactersLength)).join('');
     };
 
     const createUserIfNotExists = async (name: string) => {
