@@ -1,4 +1,3 @@
-/* Main container layout */
 .home_page {
     display: flex;
     width: 100%;
@@ -10,7 +9,7 @@
 }
 
 .user_details {
-    width: 15%;
+    width: 20%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -21,7 +20,7 @@
 
 .main {
     height: 100%;
-    width: 70%;
+    width: 60%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -41,13 +40,30 @@
 }
 
 
-.all_players {
-    width: 15%;
+.single_player {
     display: flex;
-    justify-content: center;
+    width: 100%;
+    flex-direction: row;
     align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    height: 60px;
+}
+
+.single_player button {
+    margin-left: auto;
+    background: none;
+    cursor: pointer;
+}
+
+.all_players {
+    width: 20%;
+    display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    padding-right: 10px;
     border-left: 2px solid #41464e;
     height: 65%;
+    overflow-x: hidden;
 }
 

@@ -1,10 +1,10 @@
 import axios from "axios";
 import UserResponse from "../../Types/UserResponse.ts";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import Admin from "../Users/Admin.tsx";
-import Player from "../Users/Player.tsx";
+import { useEffect, useState } from "react";
 import AllPlayers from "../Users/AllPlayers.tsx";
+import Admin from "../Admin/Admin.tsx";
+import Player from "../Player/Player.tsx";
 
 interface HomeProps {
     user: UserResponse | null;
@@ -14,6 +14,8 @@ interface HomeProps {
 
 export default function Home({ user, setUser, setUserName }: HomeProps) {
     const navigate = useNavigate();
+    const [allUsers, setAllUsers] = useState<UserResponse[]>([]);
+    const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
 
     const logout = async () => {
         try {
@@ -21,7 +23,6 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
             setUserName("");
             setUser(null);
             localStorage.removeItem("user");
-
             navigate("/");
         } catch (error) {
             console.error("Error logging out:", error);
@@ -29,8 +30,10 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
     };
 
     useEffect(() => {
-        console.log("User in Home:", user);
-    }, [user]);
+        axios.get<UserResponse[]>("/api/users")
+            .then((result) => setAllUsers(result.data))
+            .catch(() => console.log("Something went wrong"));
+    }, []);
 
     if (!user) return null;
 
@@ -42,10 +45,14 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
             </div>
 
             <div className="main">
-                {user.isAdmin ? <Admin /> : <Player />}
+                {user.isAdmin ? (
+                    <Admin selectedUser={selectedUser} />
+                ) : (
+                    <Player currentUserName={user.name} selectedUser={selectedUser} />
+                )}
             </div>
 
-            <AllPlayers />
+            <AllPlayers currentUser={user} allUsers={allUsers} setSelectedUser={setSelectedUser} />
         </div>
     );
 }
