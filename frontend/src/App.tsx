@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import RegisterUser from "./Components/RegisterUser.tsx";
-import Login from "./Components/Login.tsx";
+import Login from "./Components/Home/Login.tsx";
 import Header from "./Components/Header.tsx";
 import Footer from "./Components/Footer.tsx";
 import { useState, useEffect } from "react";
@@ -21,18 +21,18 @@ function App() {
     }, []);
 
     return (
-        <>
-            <Header />
+        <div className="app-container">
+            <Header/>
             <Routes>
                 <Route
                     path="/"
-                    element={<Login userName={userName} setUserName={setUserName} user={user} setUser={setUser} />}
+                    element={<Login userName={userName} setUserName={setUserName} user={user} setUser={setUser}/>}
                 />
-                <Route path="/register" element={<RegisterUser />} />
-                <Route path="/home" element={<Home user={user} setUser={setUser} setUserName={setUserName} />} />
+                <Route path="/register" element={<RegisterUser/>}/>
+                <Route path="/home" element={<Home user={user} setUser={setUser} setUserName={setUserName}/>}/>
             </Routes>
-            <Footer />
-        </>
+            <Footer/>
+        </div>
     );
 }
 

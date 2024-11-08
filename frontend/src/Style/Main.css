@@ -39,6 +39,9 @@ form {
     margin: 0;
     color: #00ADB5;
 }
+.app-container {
+    height: 100vh;
+}
 
 body {
     max-height: 100vh;

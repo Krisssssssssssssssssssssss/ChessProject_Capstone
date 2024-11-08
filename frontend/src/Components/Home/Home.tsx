@@ -2,6 +2,9 @@ import axios from "axios";
 import UserResponse from "../../Types/UserResponse.ts";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import Admin from "../Users/Admin.tsx";
+import Player from "../Users/Player.tsx";
+import AllPlayers from "../Users/AllPlayers.tsx";
 
 interface HomeProps {
     user: UserResponse | null;
@@ -25,7 +28,6 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
         }
     };
 
-
     useEffect(() => {
         console.log("User in Home:", user);
     }, [user]);
@@ -33,11 +35,17 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
     if (!user) return null;
 
     return (
-        <div className="loginFormOuter">
-            <div>Welcome! {user.name}</div>
-            <div>Admin: {user.isAdmin ? "Yes" : "No"}</div>
-            <div>GitHub User: {user.isGitHubUser ? "Yes" : "No"}</div>
-            <button onClick={logout}>Logout</button>
+        <div className="home_page">
+            <div className="user_details">
+                <h5>{user.name}</h5>
+                <button onClick={logout}>Logout</button>
+            </div>
+
+            <div className="main">
+                {user.isAdmin ? <Admin /> : <Player />}
+            </div>
+
+            <AllPlayers />
         </div>
     );
 }

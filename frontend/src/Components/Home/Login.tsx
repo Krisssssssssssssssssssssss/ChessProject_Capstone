@@ -1,8 +1,8 @@
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
-import Home from "./Home/Home.tsx";
-import UserResponse from "../Types/UserResponse.ts";
+import Home from "./Home.tsx";
+import UserResponse from "../../Types/UserResponse.ts";
 
 interface LoginProps {
     userName: string;

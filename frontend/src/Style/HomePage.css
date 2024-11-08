@@ -1,0 +1,53 @@
+/* Main container layout */
+.home_page {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 60px - 94.32px);
+    align-items: center;
+    justify-content: space-between;
+    margin-top:94.320px;
+    box-sizing: border-box;
+}
+
+.user_details {
+    width: 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-right: 2px solid #41464e;
+    height: 65%;
+}
+
+.main {
+    height: 100%;
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.main_inner {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.all_players {
+    width: 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-left: 2px solid #41464e;
+    height: 65%;
+}
+
