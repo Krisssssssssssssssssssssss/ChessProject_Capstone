@@ -17,11 +17,14 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
             await axios.post(`/api/auth/logout`, {});
             setUserName("");
             setUser(null);
+            localStorage.removeItem("user");
+
             navigate("/");
         } catch (error) {
             console.error("Error logging out:", error);
         }
     };
+
 
     useEffect(() => {
         console.log("User in Home:", user);

@@ -53,6 +53,16 @@ export default function Login({userName, setUserName, user, setUser}: LoginProps
             });
     };
 
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            const parsedUser = JSON.parse(storedUser) as UserResponse;
+            setUser(parsedUser);
+            setUserName(parsedUser.name);
+            navigate("/home");
+        }
+    }, [navigate, setUser, setUserName]);
+
     const handleLoginDatabase = async () => {
         try {
             const userResponse = await axios.post<UserResponse>('/api/users/login', {
@@ -62,17 +72,21 @@ export default function Login({userName, setUserName, user, setUser}: LoginProps
             });
 
             if (userResponse.data) {
-                console.log(`${userInputValue} logged in successfully`);
                 setUser(userResponse.data);
                 setUserName(userResponse.data.name);
+
+                // Store user data in localStorage
+                localStorage.setItem("user", JSON.stringify(userResponse.data));
+
                 setUserInputValue("");
                 setPasswordInputValue("");
-                navigate("/home")
+                navigate("/home");
             }
         } catch (error) {
             console.error("Login failed: ", error);
         }
     };
+
 
     const generateRandomPassword = (length: number) => {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
@@ -111,6 +125,9 @@ export default function Login({userName, setUserName, user, setUser}: LoginProps
 
 
     useEffect(() => {
+        if(userName){
+            navigate("/home")
+        }
         loadUser();
     }, []);
 
@@ -160,7 +177,7 @@ export default function Login({userName, setUserName, user, setUser}: LoginProps
         );
     } else {
         return (
-            <Home userName={userName} setUserName={setUserName} user={user} setUser={setUser} />
+            <Home user={user} setUser={setUser} setUserName={setUserName}/>
         );
     }
 }
