@@ -20,15 +20,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/api/**") // Disable CSRF for API endpoints
+                .csrf(csrf -> csrf.disable()
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/me").permitAll()       // Allow access to /me without OAuth session
-                        .requestMatchers("/api/users").permitAll()          // Allow public access for registration
-                        .requestMatchers("/api/users/**").authenticated()   // Secure user operations
-                        .requestMatchers("/api/**").authenticated()         // Secure all other API endpoints
-                        .anyRequest().permitAll()                           // Allow public access to all other endpoints
+                        .requestMatchers("/api/auth/me").permitAll()
+                        .requestMatchers("/api/users").permitAll()
+                        .requestMatchers("/api/users/login").permitAll() // Allow access to /login for unauthenticated users
+                        .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Use session for OAuth2

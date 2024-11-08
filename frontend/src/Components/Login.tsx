@@ -2,45 +2,113 @@ import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import Home from "./Home/Home.tsx";
+import UserResponse from "../Types/UserResponse.ts";
 
 interface LoginProps {
     userName: string;
     setUserName: (name: string) => void;
+    user: UserResponse | null;
+    setUser: (user: UserResponse | null) => void;
 }
 
-export default function Login({userName, setUserName}: LoginProps) {
+export default function Login({userName, setUserName, user, setUser}: LoginProps) {
     const [userInputValue, setUserInputValue] = useState("");
-    const [password, setPassword] = useState('');
+    const [passwordInputValue, setPasswordInputValue] = useState('');
     const navigate = useNavigate();
 
-    const handleNavigate = () => {
+    const navigateToRegisterPage = () => {
         navigate("/register");
     };
 
-    function login() {
-        const host = window.location.host === 'localhost:5173' ? 'http://localhost:8080' : window.location.origin;
-        window.open(host + '/oauth2/authorization/github', '_self');
-        axios.get('/api/auth/me')
-    }
 
     const loadUser = () => {
         axios.get('/api/auth/me')
             .then(response => {
-                const githubUserName = response.data;
-                setUserName(githubUserName);
+                setUserName(response.data);
+            })
+            .catch(() => {
+                console.log("Error: User login failed. Please try again.");
+                setUserName(user!.name);
+            });
+    };
+
+    const handleLogin = (isGitHubUser : boolean) => {
+        if (isGitHubUser) {
+            handleLoginGitHub()
+        }
+        else {
+            handleLoginDatabase();
+        }
+    }
+
+    const handleLoginGitHub = () => {
+        const host = window.location.host === 'localhost:5173' ? 'http://localhost:8080' : window.location.origin;
+        window.open(host + '/oauth2/authorization/github', '_self');
+        axios.get('/api/auth/me')
+            .then(response => {
+                setUserName(response.data);
             })
             .catch(() => {
                 console.log("Error: User login failed. Please try again.");
             });
     };
 
-    const handleLoginGitHub = () => {
-        login();
+    const handleLoginDatabase = async () => {
+        try {
+            const userResponse = await axios.post<UserResponse>('/api/users/login', {
+                name: userInputValue,
+                password: passwordInputValue,
+                isGitHubUser: false
+            });
+
+            if (userResponse.data) {
+                console.log(`${userInputValue} logged in successfully`);
+                setUser(userResponse.data);
+                setUserName(userResponse.data.name);
+                setUserInputValue("");
+                setPasswordInputValue("");
+                navigate("/home")
+            }
+        } catch (error) {
+            console.error("Login failed: ", error);
+        }
     };
 
-    const handleLoginDatabase = () => {
-        setUserName(userInputValue);
+    const generateRandomPassword = (length: number) => {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+        const charactersLength = characters.length;
+        const array = new Uint32Array(length);
+        crypto.getRandomValues(array);
+
+        return Array.from(array, (num) => characters.charAt(num % charactersLength)).join('');
     };
+
+    const createUserIfNotExists = async (name: string) => {
+        try {
+            const userResponse = await axios.get(`/api/users/find_by_name/${name}`);
+            if (userResponse.data) {
+                setUser(userResponse.data);
+                return;
+            }
+
+            const newUserResponse = await axios.post<UserResponse>('/api/users', {
+                name,
+                password: generateRandomPassword(12),
+                isGitHubUser: true
+            });
+            setUser(newUserResponse.data);
+            console.log(`${name} created`);
+        } catch (err) {
+            console.error("Error checking or creating GitHub user:", err);
+        }
+    };
+
+    useEffect(() => {
+        if (userName) {
+            createUserIfNotExists(userName);
+        }
+    }, [userName]);
+
 
     useEffect(() => {
         loadUser();
@@ -65,26 +133,26 @@ export default function Login({userName, setUserName}: LoginProps) {
                         <input
                             type="password"
                             id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={passwordInputValue}
+                            onChange={(e) => setPasswordInputValue(e.target.value)}
                             required
                         />
 
-                        <button type="button" onClick={handleLoginDatabase}>Login</button>
+                        <button type="button" onClick={() => handleLogin(false)}>Login</button>
                     </form>
-                    <button type="button" onClick={handleLoginGitHub}>Login with GitHub   <i
+                    <button type="button" onClick={() => handleLogin(true)}>Login with GitHub <i
                         className="fa-brands fa-github"></i></button>
 
                 </div>
                 <div className="noAccount_PleaseRegister">
                     <p>Don't have an account yet? Click
                         <a className="RegisterSpan"
-                            onClick={handleNavigate}
-                            tabIndex={0}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleNavigate();
-                            }}
-                            role="button"> here </a>
+                           onClick={navigateToRegisterPage}
+                           tabIndex={0}
+                           onKeyDown={(e) => {
+                               if (e.key === 'Enter') navigateToRegisterPage();
+                           }}
+                           role="button"> here </a>
                         to register.
                     </p>
                 </div>
@@ -92,7 +160,7 @@ export default function Login({userName, setUserName}: LoginProps) {
         );
     } else {
         return (
-            <Home userName={userName} setUserName={setUserName}/>
+            <Home userName={userName} setUserName={setUserName} user={user} setUser={setUser} />
         );
     }
 }

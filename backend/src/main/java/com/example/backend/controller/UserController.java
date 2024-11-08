@@ -49,7 +49,7 @@ public class UserController {
         userService.deleteUser(id);
     }
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     public UserResponse getUserByLogin(@RequestBody UserRequest userRequest) {
         UserModel user = userRequest.toModel();
         return UserResponse.from(userService.getUserByName_and_Password(user));
