@@ -7,9 +7,11 @@ interface AdminProps {
     selectedUser: UserResponse | null;
     setSelectedUser: (user: UserResponse | null) => void;
     setAllUsers: (users: UserResponse[]) => void;
+    userGotUpdated: boolean;
+    setUserGotUpdated: (updated: boolean) => void;
 }
 
-export default function Admin({ selectedUser, setSelectedUser, setAllUsers }: AdminProps) {
+export default function Admin({ selectedUser, setSelectedUser, setAllUsers, userGotUpdated, setUserGotUpdated }: AdminProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [editedUser, setEditedUser] = useState<UserResponse | null>(null);
     const [originalUser, setOriginalUser] = useState<UserResponse | null>(null);
@@ -60,6 +62,8 @@ export default function Admin({ selectedUser, setSelectedUser, setAllUsers }: Ad
             await axios.put(`/api/users/${editedUser!.id}`, userRequest);
             setSuccessMessage("User updated successfully!");
             setOriginalUser(editedUser);
+            setUserGotUpdated(!userGotUpdated);
+
         } catch (err) {
             setError("Something went wrong. Please try again.");
             setEditedUser(originalUser);
