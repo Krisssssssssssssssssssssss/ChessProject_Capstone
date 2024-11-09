@@ -16,6 +16,7 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
     const navigate = useNavigate();
     const [allUsers, setAllUsers] = useState<UserResponse[]>([]);
     const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
+    const [userGotUpdated, setUserGotUpdated] = useState(false);
 
     const logout = async () => {
         try {
@@ -33,7 +34,7 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
         axios.get<UserResponse[]>("/api/users")
             .then((result) => setAllUsers(result.data))
             .catch(() => console.log("Something went wrong"));
-    }, []);
+    }, [userGotUpdated]);
 
     if (!user) return null;
 
@@ -46,7 +47,7 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
 
             <div className="main">
                 {user.isAdmin ? (
-                    <Admin selectedUser={selectedUser} setSelectedUser={setSelectedUser} setAllUsers={setAllUsers}/>
+                    <Admin selectedUser={selectedUser} setSelectedUser={setSelectedUser} setAllUsers={setAllUsers} setUserGotUpdated={setUserGotUpdated} userGotUpdated={userGotUpdated}/>
                 ) : (
                     <Player currentUserName={user.name} selectedUser={selectedUser} />
                 )}
