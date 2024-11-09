@@ -46,7 +46,7 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
 
             <div className="main">
                 {user.isAdmin ? (
-                    <Admin selectedUser={selectedUser} />
+                    <Admin selectedUser={selectedUser} setSelectedUser={setSelectedUser} setAllUsers={setAllUsers}/>
                 ) : (
                     <Player currentUserName={user.name} selectedUser={selectedUser} />
                 )}

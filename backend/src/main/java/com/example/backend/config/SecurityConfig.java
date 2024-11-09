@@ -22,12 +22,9 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()
                 )
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/me").permitAll()
-                        .requestMatchers("/api/users").permitAll()
-                        .requestMatchers("/api/users/login").permitAll() // Allow access to /login for unauthenticated users
-                        .requestMatchers("/api/users/**").authenticated()
-                        .requestMatchers("/api/**").authenticated()
+                .authorizeHttpRequests(a -> a
+                        .requestMatchers("/api/auth/me").authenticated()
+                        .requestMatchers("/api/secured").authenticated()
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session ->

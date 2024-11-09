@@ -1,10 +1,9 @@
 .RegisterSpan {
-    text-decoration: underline;
     color: #00ADB5;
 }
 
 .RegisterSpan:hover {
-    text-decoration: none;
+    text-decoration: underline;
     color: #EEEEEE;
     cursor: pointer;
 }
@@ -62,10 +61,15 @@ body {
 
 .footer p {
     margin-bottom: 0px;
+    font-family: "Indie Flower", cursive;
+    font-size: 18px;
 }
 
 .heart {
     color: #00ADB5;
+}
+body {
+    font-family: "Roboto Light", serif;
 }
 
 hr {
@@ -76,13 +80,29 @@ hr {
     margin-left: auto;
     margin-right: auto;
 }
-.registerUserForm  label{
+.registerUserForm {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
-    justify-content: space-between;
-    margin-bottom: 30px;
+    max-width: 400px; /* Control max width for alignment */
+    margin: 0 auto;
 }
+
+.registerUserForm label {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.registerUserForm input {
+    width: 60%;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
 .bodyInner {
     max-height: 100%;
     display: block;

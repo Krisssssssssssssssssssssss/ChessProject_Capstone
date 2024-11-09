@@ -4,7 +4,7 @@ import SinglePlayerElement from "../Player/SinglePlayerElement.tsx";
 interface AllPlayersProps {
     currentUser: UserResponse;
     allUsers: UserResponse[];
-    setSelectedUser: (user: UserResponse) => void;
+    setSelectedUser: (user: UserResponse | null) => void;
 }
 
 export default function AllPlayers({ currentUser, allUsers, setSelectedUser }: AllPlayersProps) {

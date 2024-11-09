@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client'
 import './Style/index.css'
 import './Style/Main.css'
 import './Style/HomePage.css'
+import './Style/AdminComponent.css'
 import App from './App.tsx'
 import {BrowserRouter} from "react-router-dom";
 
