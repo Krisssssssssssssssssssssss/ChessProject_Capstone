@@ -1,0 +1,66 @@
+.actions {
+    width: 20%;
+    display: flex;
+    justify-content: space-between;
+}
+.delete_button {
+    background-color: #FF2E63;
+}
+
+.edit_button {
+    background-color: #EAEAEA;
+    color: #393E46;
+}
+.actions button:hover {
+    background-color: #393E46;
+    color: #EAEAEA;
+}
+.admin_inner {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.details {
+    width: 50%;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.detail_row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin: 5px 0;
+    align-items: center;
+}
+
+.detail_row label {
+    flex: 1;
+    text-align: left;
+    font-weight: bold;
+}
+
+.detail_row input,
+.detail_row span {
+    flex: 2;
+    text-align: left;
+    margin-left: 10px;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.edit_button,
+.update_button,
+.delete_button {
+    padding: 5px 10px;
+    cursor: pointer;
+}

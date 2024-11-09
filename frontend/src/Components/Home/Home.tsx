@@ -1,76 +1,58 @@
 import axios from "axios";
 import UserResponse from "../../Types/UserResponse.ts";
-import {useEffect, useState} from "react";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import AllPlayers from "../Users/AllPlayers.tsx";
+import Admin from "../Admin/Admin.tsx";
+import Player from "../Player/Player.tsx";
 
 interface HomeProps {
-    userName: string;
+    user: UserResponse | null;
+    setUser: (user: UserResponse | null) => void;
     setUserName: (name: string) => void;
 }
 
-export default function Home({userName, setUserName}: HomeProps) {
-    const [user, setUser] = useState<UserResponse | null>(null);
+export default function Home({ user, setUser, setUserName }: HomeProps) {
+    const navigate = useNavigate();
+    const [allUsers, setAllUsers] = useState<UserResponse[]>([]);
+    const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
 
-    const logoutGitHub = async () => {
-        console.log("Logout button clicked");
-
+    const logout = async () => {
         try {
             await axios.post(`/api/auth/logout`, {});
-            console.log("Logged out successfully");
-
             setUserName("");
-
-            const response = await axios.get('/api/auth/me');
-            if (!response.data) {
-                console.log("Session cleared on server.");
-            } else {
-                console.warn("Session might not be cleared; user still found:", response.data);
-            }
+            setUser(null);
+            localStorage.removeItem("user");
+            navigate("/");
         } catch (error) {
             console.error("Error logging out:", error);
         }
     };
 
-    const generateRandomPassword = (length: number) => {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
-        const charactersLength = characters.length;
-        const array = new Uint32Array(length);
-        crypto.getRandomValues(array); // Generates cryptographically secure random values
-
-        return Array.from(array, (num) => characters.charAt(num % charactersLength)).join('');
-    };
-
-    const createUserIfNotExists = async (name: string) => {
-        try {
-            const userResponse = await axios.get(`/api/users/find_by_name/${name}`);
-            if (userResponse.data) {
-                console.log(`${name} already exists`);
-                setUser(userResponse.data);
-                console.log(userResponse.data);
-                return;
-            }
-
-            const newUserResponse = await axios.post<UserResponse>('/api/users', {
-                name,
-                password: generateRandomPassword(12),
-                isGitHubUser: true
-            });
-            setUserName(newUserResponse.data.name);
-            console.log(`${name} created`);
-        } catch (err) {
-            console.error("Error checking or creating GitHub user:", err);
-        }
-    };
-
     useEffect(() => {
-        if (userName) {
-            createUserIfNotExists(userName);
-        }
-    }, [userName]);
+        axios.get<UserResponse[]>("/api/users")
+            .then((result) => setAllUsers(result.data))
+            .catch(() => console.log("Something went wrong"));
+    }, []);
+
+    if (!user) return null;
 
     return (
-        <div className={"loginFormOuter"}>
-            <div>Welcome! {userName}</div>
-            <button onClick={logoutGitHub}>Logout</button>
+        <div className="home_page">
+            <div className="user_details">
+                <h5>{user.name}</h5>
+                <button onClick={logout}>Logout</button>
+            </div>
+
+            <div className="main">
+                {user.isAdmin ? (
+                    <Admin selectedUser={selectedUser} setSelectedUser={setSelectedUser} setAllUsers={setAllUsers}/>
+                ) : (
+                    <Player currentUserName={user.name} selectedUser={selectedUser} />
+                )}
+            </div>
+
+            <AllPlayers currentUser={user} allUsers={allUsers} setSelectedUser={setSelectedUser} />
         </div>
     );
 }

@@ -6,15 +6,17 @@ import lombok.NonNull;
 public record UserRequest(
         @NonNull String name,
         @NonNull String password,
-        @NonNull Boolean isGitHubUser
+        @NonNull Boolean isGitHubUser,
+        String rating,
+        Boolean isAdmin
 ) {
     public UserModel toModel() {
         return UserModel.builder()
                 .name(name)
                 .password(password)
                 .isGitHubUser(isGitHubUser)
-                .rating(String.valueOf(1500))
-                .isAdmin(false)
+                .rating(rating != null ? rating : "1500") // Default rating if null
+                .isAdmin(isAdmin != null && isAdmin) // Default admin status if null
                 .build();
     }
 }
