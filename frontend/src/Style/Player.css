@@ -1,18 +1,14 @@
 .top-left-player, .bottom-left-player {
     position: absolute;
-    left: 25px;
+    left: 3%; /* Center align horizontally within the container */
     font-size: 0.9em;
     color: #EEEEEE;
 }
 
 .top-left-player {
-    top: 20px;
+    top: 10px; /* Adjust as needed for spacing */
 }
 
 .bottom-left-player {
-    bottom: 20px;
-}
-
-.fa-2xl {
-    margin-right: 20px;
+    bottom: 10px;
 }

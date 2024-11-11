@@ -1,5 +1,7 @@
 import UserResponse from "../../Types/UserResponse.ts";
-import Chessboard from "../Chessboard.tsx";
+import ChessboardLocal from "../ChessboardLocal.tsx";
+import { Chessboard } from "react-chessboard";
+
 
 interface PlayerProps {
     currentUserName: string;
@@ -18,12 +20,15 @@ export default function Player({ currentUserName, selectedUser }: PlayerProps) {
             )}
 
             <div className="chessboard-container">
-                <Chessboard />
+                <div className="chessboard-container" style={{maxHeight: '80vh'}}>
+                    <Chessboard id="BasicBoard"/>
+                </div>
+
             </div>
 
             {selectedUser && (
                 <div className="bottom-left-player">
-                    <i className="fa-solid fa-user fa-2xl"></i> {currentUserName}
+                <i className="fa-solid fa-user fa-2xl"></i> {currentUserName}
                 </div>
             )}
         </div>
