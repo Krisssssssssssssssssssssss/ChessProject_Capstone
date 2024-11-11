@@ -4,6 +4,8 @@ import './Style/index.css'
 import './Style/Main.css'
 import './Style/HomePage.css'
 import './Style/AdminComponent.css'
+import './Style/Player.css'
+import './Style/Chessboard.css'
 import App from './App.tsx'
 import {BrowserRouter} from "react-router-dom";
 
