@@ -1,0 +1,18 @@
+.top-left-player, .bottom-left-player {
+    position: absolute;
+    left: 25px;
+    font-size: 0.9em;
+    color: #EEEEEE;
+}
+
+.top-left-player {
+    top: 20px;
+}
+
+.bottom-left-player {
+    bottom: 20px;
+}
+
+.fa-2xl {
+    margin-right: 20px;
+}
