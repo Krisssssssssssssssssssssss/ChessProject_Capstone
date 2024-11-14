@@ -13,6 +13,7 @@ export default function Player({currentUserName, selectedUser}: PlayerProps) {
     function onDrop(sourceSquare: any, targetSquare: any) {
         console.log(sourceSquare);
         console.log(targetSquare);
+        return true;
     }
 
     useEffect(() => {
