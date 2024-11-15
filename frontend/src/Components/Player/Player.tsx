@@ -12,9 +12,23 @@ interface PlayerProps {
 export default function Player({currentUser, selectedUser}: PlayerProps) {
     const [fen, setFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1.");
 
-    function onDrop(sourceSquare: any, targetSquare: any) {
-        console.log(sourceSquare);
-        console.log(targetSquare);
+    function onDrop(sourceSquare: string, targetSquare: string) {
+        if (currentUser && selectedUser) {
+
+            axios.get(`api/game/move`, {
+                // @ts-ignore
+                playerOneId: currentUser.id,
+                playerTwoId: selectedUser.id,
+                sourceSquare,
+                targetSquare
+            })
+                .then((response: { data: string }) => {
+                    setFen(response.data);
+                })
+                .catch(() => {
+                    console.log("Something went wrong! The move could not be processed.");
+                });
+        }
         return true;
     }
 

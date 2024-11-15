@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.GameRequest;
 import com.example.backend.dto.GameResponse;
+import com.example.backend.dto.MakeMoveRequest;
 import com.example.backend.model.GameModel;
 import com.example.backend.service.GameService;
 import lombok.AllArgsConstructor;
@@ -26,5 +27,9 @@ public class GameController {
     @GetMapping("/doesGameExist/{playerOneId}/{playerTwoId}")
     public boolean doesGameExist (@PathVariable String playerOneId, @PathVariable String playerTwoId) {
         return gameService.doesGameExist(playerOneId, playerTwoId);
+    }
+    @GetMapping("/move")
+    public String makeMove (MakeMoveRequest makeMoveRequest) {
+        return gameService.makeMove(makeMoveRequest);
     }
 }

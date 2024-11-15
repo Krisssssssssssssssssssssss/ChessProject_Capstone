@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.MakeMoveRequest;
 import com.example.backend.exception.UserAlreadyExistsException;
 import com.example.backend.model.GameModel;
 import com.example.backend.repository.GameRepository;
@@ -30,5 +31,8 @@ public class GameService {
     public boolean doesGameExist(String playerId, String playerTwoId) {
         Optional<GameModel> existingGame = gameRepository.findGameByPlayerOneIdAndPlayerTwoId(playerId, playerTwoId);
         return existingGame.isPresent();
+    }
+    public String makeMove (MakeMoveRequest makeMoveRequest) {
+        return "rnbqkbnr/8/8/8/8/8/8/RNBQKBNR b KQkq e3 0 1.";
     }
 }
