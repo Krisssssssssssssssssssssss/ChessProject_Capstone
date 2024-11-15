@@ -49,7 +49,7 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
                 {user.isAdmin ? (
                     <Admin selectedUser={selectedUser} setSelectedUser={setSelectedUser} setAllUsers={setAllUsers} setUserGotUpdated={setUserGotUpdated} userGotUpdated={userGotUpdated}/>
                 ) : (
-                    <Player currentUserName={user.name} selectedUser={selectedUser} />
+                    <Player currentUser={user} selectedUser={selectedUser} />
                 )}
             </div>
 

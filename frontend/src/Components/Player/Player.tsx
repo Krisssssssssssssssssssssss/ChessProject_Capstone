@@ -1,26 +1,65 @@
 import UserResponse from "../../Types/UserResponse.ts";
 import {Chessboard} from "react-chessboard";
 import {useState, useEffect} from "react";
+import GameResponse from "../../Types/GameResponse.ts";
+import axios from "axios";
 
 interface PlayerProps {
-    currentUserName: string;
+    currentUser: UserResponse | null;
     selectedUser: UserResponse | null;
 }
 
-export default function Player({currentUserName, selectedUser}: PlayerProps) {
-    const [fen, setFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+export default function Player({currentUser, selectedUser}: PlayerProps) {
+    const [fen, setFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1.");
 
-    function onDrop(sourceSquare: any, targetSquare: any) {
-        console.log(sourceSquare);
-        console.log(targetSquare);
+    function onDrop(sourceSquare: string, targetSquare: string) {
+        if (currentUser && selectedUser) {
+
+            axios.get(`api/game/move`, {
+                // @ts-ignore
+                playerOneId: currentUser.id,
+                playerTwoId: selectedUser.id,
+                sourceSquare,
+                targetSquare
+            })
+                .then((response: { data: string }) => {
+                    setFen(response.data);
+                })
+                .catch(() => {
+                    console.log("Something went wrong! The move could not be processed.");
+                });
+        }
         return true;
     }
 
     useEffect(() => {
-        if (selectedUser) {
-            setFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+        if (currentUser?.id && selectedUser?.id) {
+            axios.get<boolean>(`api/game/doesGameExist/${currentUser.id}/${selectedUser.id}`)
+                .then((response: { data: boolean }) => {
+                    if (response.data) {
+                        axios.get<GameResponse>(`api/game/getGame/${currentUser.id}/${selectedUser.id}`)
+                            .then((response: { data: GameResponse }) => {
+                                setFen(response.data.fenString);
+                            })
+                            .catch(() => {
+                                console.log("Something went wrong! The game couldn't be loaded.");
+                            });
+                    } else {
+                        axios.post<GameResponse>(`api/game`, { playerOneId: currentUser.id, playerTwoId: selectedUser.id })
+                            .then((response: { data: GameResponse }) => {
+                                setFen(response.data.fenString);
+                            })
+                            .catch(() => {
+                                console.log("Something went wrong! The game couldn't be loaded.");
+                            });
+                    }
+                })
+                .catch((error: any) => {
+                    console.log("Error checking if the game exists:", error);
+                });
         }
     }, [selectedUser]);
+
 
     return (
         <div className="main_inner">
@@ -42,7 +81,7 @@ export default function Player({currentUserName, selectedUser}: PlayerProps) {
 
             {selectedUser && (
                 <div className="bottom-left-player">
-                    <i className="fa-solid fa-user fa-2xl"></i> {currentUserName}
+                    <i className="fa-solid fa-user fa-2xl"></i> {currentUser?.name}
                 </div>
             )}
         </div>
