@@ -24,12 +24,14 @@ public class GameController {
     public GameModel getGame(@PathVariable String playerOneId, @PathVariable String playerTwoId) {
         return gameService.getGame(playerOneId, playerTwoId);
     }
+
     @GetMapping("/doesGameExist/{playerOneId}/{playerTwoId}")
-    public boolean doesGameExist (@PathVariable String playerOneId, @PathVariable String playerTwoId) {
+    public boolean doesGameExist(@PathVariable String playerOneId, @PathVariable String playerTwoId) {
         return gameService.doesGameExist(playerOneId, playerTwoId);
     }
+
     @GetMapping("/move")
-    public String makeMove (MakeMoveRequest makeMoveRequest) {
+    public String makeMove(MakeMoveRequest makeMoveRequest) {
         return gameService.makeMove(makeMoveRequest);
     }
 }
