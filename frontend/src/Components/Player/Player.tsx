@@ -13,14 +13,19 @@ export default function Player({currentUser, selectedUser}: PlayerProps) {
     const [fen, setFen] = useState("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1.");
 
     function onDrop(sourceSquare: string, targetSquare: string) {
-        if (currentUser && selectedUser) {
+        console.log(currentUser?.id);
+        console.log(selectedUser?.id);
+        console.log(sourceSquare);
+        console.log(targetSquare);
 
+        if (currentUser && selectedUser) {
             axios.get(`api/game/move`, {
-                // @ts-ignore
-                playerOneId: currentUser.id,
-                playerTwoId: selectedUser.id,
-                sourceSquare,
-                targetSquare
+                params: {
+                    playerOneId: currentUser.id,
+                    playerTwoId: selectedUser.id,
+                    sourceSquare: sourceSquare,
+                    targetSquare: targetSquare
+                }
             })
                 .then((response: { data: string }) => {
                     setFen(response.data);
@@ -72,7 +77,14 @@ export default function Player({currentUser, selectedUser}: PlayerProps) {
             <div className="chessboard-container">
                 {selectedUser ? (
                     <div className="chessboard-container">
-                        <Chessboard position={fen} onPieceDrop={onDrop}/>
+                        <Chessboard
+                            position={fen}
+                            onPieceDrop={onDrop}
+                            customDarkSquareStyle={{ backgroundColor: "#AF8260" }}
+                            customLightSquareStyle={{ backgroundColor: "#E4C59E" }}
+                            animationDuration={0}
+                        />
+
                     </div>
                 ) : (
                     <p className="select-player-text">Select a player you want to play against!</p>
