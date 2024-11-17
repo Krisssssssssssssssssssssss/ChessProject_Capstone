@@ -12,6 +12,7 @@ public record GameRequest(
                 .fenString("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq e3 0 1.")
                 .playerOneId(playerOneId)
                 .playerTwoId(playerTwoId)
+                .hasTurn("w")
                 .build();
     }
 }
