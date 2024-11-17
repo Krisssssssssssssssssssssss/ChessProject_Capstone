@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.MakeMoveRequest;
 import com.example.backend.exception.GameNotFoundException;
 import com.example.backend.exception.UserAlreadyExistsException;
 import com.example.backend.model.GameModel;
@@ -16,7 +17,6 @@ class GameServiceTest {
 
     private static final String ID_FIRST = "John";
     private static final String ID_SECOND = "Jane";
-    private static final String ID_THIRD = "Jack";
 
     private final GameRepository mockGameRepo = mock(GameRepository.class);
     private final IdService idService = new IdService();
@@ -102,5 +102,47 @@ class GameServiceTest {
 
         assertEquals(expectedGame, result);
     }
+
+    @Test
+    @DirtiesContext
+    void makeMove() throws Exception {
+        GameModel expectedGame = GameModel.builder()
+                .playerOneId(ID_FIRST)
+                .playerTwoId(ID_SECOND)
+                .fenString("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+                .build();
+
+        MakeMoveRequest mockMakeMoveRequest = new MakeMoveRequest(
+                ID_FIRST,
+                ID_SECOND,
+                "a7",
+                "a6"
+        );
+
+        String updatedFen = "rnbqkbnr/1ppppppp/p7/8/8/8/PPPPPPPP/RNBQKBNR";
+
+        when(mockGameRepo.findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND)).thenReturn(Optional.of(expectedGame));
+        when(mockGameRepo.save(any(GameModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        GameService gameService = new GameService(mockGameRepo, idService);
+
+        String resultFen = gameService.makeMove(mockMakeMoveRequest);
+
+        verify(mockGameRepo).findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND);
+        verify(mockGameRepo).save(any(GameModel.class));
+
+        assertEquals(updatedFen, resultFen);
+    }
+
+    @Test
+    @DirtiesContext
+    void makeMove_failed() {
+        GameService gameService = new GameService(mockGameRepo, idService);
+        assertThrows(NullPointerException.class, () -> gameService.makeMove(null));
+        verifyNoInteractions(mockGameRepo);
+    }
+
+
+
 
 }

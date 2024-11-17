@@ -52,9 +52,7 @@ public class GameService {
     }
 
     private List<List<Tile>> executeTheMove(List<List<Tile>> board, String sourceSquare, String targetSquare) {
-
         Piece pieceToMove = null;
-
         for (List<Tile> row : board) {
             for (Tile tile : row) {
                 if (tile.getName().equals(sourceSquare)) {
@@ -65,7 +63,6 @@ public class GameService {
                 }
             }
         }
-
         for (List<Tile> row : board) {
             for (Tile tile : row) {
                 if (tile.getName().equals(targetSquare)) {
