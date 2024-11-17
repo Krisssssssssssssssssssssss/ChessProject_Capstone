@@ -4,10 +4,9 @@ import com.example.backend.dto.MakeMoveRequest;
 import com.example.backend.exception.GameNotFoundException;
 import com.example.backend.exception.UserAlreadyExistsException;
 import com.example.backend.model.GameModel;
-import com.example.backend.model.Piece;
+import com.example.backend.model.Pieces.Piece;
 import com.example.backend.model.Tile;
 import com.example.backend.repository.GameRepository;
-import com.example.backend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -43,12 +42,33 @@ public class GameService {
     public String makeMove(MakeMoveRequest makeMoveRequest) {
         GameModel game = this.getGame(makeMoveRequest.playerOneId(), makeMoveRequest.playerTwoId());
         List<List<Tile>> gameBoard = FenConverter.toBoardArray(game.getFenString());
-        //DO CHECKS IF ALLOWED
-        gameBoard = this.executeTheMove(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare());
-        String editedFen =  FenConverter.toFen(gameBoard);
-        game.setFenString(editedFen);
-        gameRepository.save(game);
-        return editedFen;
+        boolean isMoveAllowed = isMoveAllowed(gameBoard,makeMoveRequest.sourceSquare(),makeMoveRequest.targetSquare(),game);
+        if (isMoveAllowed) {
+            gameBoard = this.executeTheMove(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare());
+            String editedFen =  FenConverter.toFen(gameBoard);
+            game.setFenString(editedFen);
+            game.setWhite(!game.isWhite());
+            gameRepository.save(game);
+            return editedFen;
+        }
+        else {
+            return game.getFenString();
+        }
+    }
+
+    public boolean isMoveAllowed(List<List<Tile>> board, String sourceSquare, String targetSquare, GameModel game) {
+        for (List<Tile> row : board) {
+            for (Tile tile : row) {
+                if (tile.getName().equals(sourceSquare)) {
+                    Piece pieceToMove = tile.getPiece();
+                    if ((pieceToMove.getColor().equals("w") && !game.isWhite()) ||
+                            (pieceToMove.getColor().equals("b") && game.isWhite())){
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private List<List<Tile>> executeTheMove(List<List<Tile>> board, String sourceSquare, String targetSquare) {

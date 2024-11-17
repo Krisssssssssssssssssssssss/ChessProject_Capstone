@@ -16,5 +16,5 @@ public class GameModel {
     private String fenString;
     private String playerOneId;
     private String playerTwoId;
-    private String hasTurn;
+    private boolean isWhite;
 }

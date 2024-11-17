@@ -19,6 +19,7 @@ class GameServiceTest {
     private static final String ID_SECOND = "Jane";
 
     private final GameRepository mockGameRepo = mock(GameRepository.class);
+    private final GameService mockGameService = mock(GameService.class);
     private final IdService idService = new IdService();
 
     @Test
@@ -105,11 +106,13 @@ class GameServiceTest {
 
     @Test
     @DirtiesContext
-    void makeMove() throws Exception {
+    void makeMove_isMoveAllowed_True() throws Exception {
+        // Arrange
         GameModel expectedGame = GameModel.builder()
                 .playerOneId(ID_FIRST)
                 .playerTwoId(ID_SECOND)
                 .fenString("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+                .isWhite(true) // White to move
                 .build();
 
         MakeMoveRequest mockMakeMoveRequest = new MakeMoveRequest(
@@ -121,17 +124,51 @@ class GameServiceTest {
 
         String updatedFen = "rnbqkbnr/1ppppppp/p7/8/8/8/PPPPPPPP/RNBQKBNR";
 
-        when(mockGameRepo.findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND)).thenReturn(Optional.of(expectedGame));
-        when(mockGameRepo.save(any(GameModel.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(mockGameRepo.findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND))
+                .thenReturn(Optional.of(expectedGame));
+        when(mockGameRepo.save(any(GameModel.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        GameService gameService = new GameService(mockGameRepo, idService);
+        GameService gameService = spy(new GameService(mockGameRepo, idService));
+
+        doReturn(true).when(gameService).isMoveAllowed(any(), any(), any(), any());
 
         String resultFen = gameService.makeMove(mockMakeMoveRequest);
 
         verify(mockGameRepo).findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND);
         verify(mockGameRepo).save(any(GameModel.class));
-
         assertEquals(updatedFen, resultFen);
+    }
+
+    @Test
+    @DirtiesContext
+    void makeMove_sMoveAllowed_False() throws Exception {
+        GameModel expectedGame = GameModel.builder()
+                .playerOneId(ID_FIRST)
+                .playerTwoId(ID_SECOND)
+                .fenString("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+                .isWhite(true)
+                .build();
+
+        MakeMoveRequest mockMakeMoveRequest = new MakeMoveRequest(
+                ID_FIRST,
+                ID_SECOND,
+                "a7",
+                "a6"
+        );
+
+        when(mockGameRepo.findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND))
+                .thenReturn(Optional.of(expectedGame));
+
+        GameService gameService = spy(new GameService(mockGameRepo, idService));
+
+        doReturn(false).when(gameService).isMoveAllowed(any(), any(), any(), any());
+
+        String resultFen = gameService.makeMove(mockMakeMoveRequest);
+
+        verify(mockGameRepo).findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND);
+        verify(mockGameRepo, never()).save(any(GameModel.class));
+        assertEquals("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", resultFen);
     }
 
     @Test
@@ -141,8 +178,6 @@ class GameServiceTest {
         assertThrows(NullPointerException.class, () -> gameService.makeMove(null));
         verifyNoInteractions(mockGameRepo);
     }
-
-
 
 
 }
