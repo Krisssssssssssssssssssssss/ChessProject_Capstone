@@ -1,5 +1,6 @@
 package com.example.backend.dto;
 
+import com.example.backend.dto.pieceMovement.EnPassant;
 import com.example.backend.model.GameModel;
 import lombok.NonNull;
 
@@ -13,6 +14,7 @@ public record GameRequest(
                 .playerOneId(playerOneId)
                 .playerTwoId(playerTwoId)
                 .isWhite(true)
+                .enPassant(new EnPassant("", ""))
                 .build();
     }
 }

@@ -1,14 +1,16 @@
 package com.example.backend.model.Pieces;
 
+import com.example.backend.model.Tile;
 import lombok.*;
 
+import java.util.List;
+
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@With
-@Data
 public class Piece {
-    String type;
-    String color;
-    boolean isKing;
+    private String type;
+    private String color;
+    private boolean isKing;
 }
