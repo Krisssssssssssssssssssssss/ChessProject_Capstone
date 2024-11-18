@@ -84,10 +84,10 @@ public class GameService {
                     }
                     switch (pieceToMove.getType().toLowerCase()) {
                         case "p" -> canMove = Pawn.canMove(board, sourceSquare, targetSquare, game);
-                        case "n" -> canMove = Knight.canMove(board, sourceSquare, targetSquare);
+//                        case "n" -> canMove = Knight.canMove(board, sourceSquare, targetSquare);
                         case "r" -> canMove = Rook.canMove(board, sourceSquare, targetSquare);
                         case "q" -> canMove = Queen.canMove(board, sourceSquare, targetSquare);
-                        case "k" -> canMove = King.canMove(board, sourceSquare, targetSquare);
+//                        case "k" -> canMove = King.canMove(board, sourceSquare, targetSquare);
                         case "b" -> canMove = Bishop.canMove(board, sourceSquare, targetSquare);
                         default -> throw new IllegalArgumentException("Unknown piece type: " + pieceToMove.getType());
                     }
