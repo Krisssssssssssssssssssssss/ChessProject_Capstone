@@ -107,7 +107,6 @@ class GameServiceTest {
     @Test
     @DirtiesContext
     void makeMove_isMoveAllowed_True() throws Exception {
-        // Arrange
         GameModel expectedGame = GameModel.builder()
                 .playerOneId(ID_FIRST)
                 .playerTwoId(ID_SECOND)
