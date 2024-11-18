@@ -1,7 +1,10 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.pieceMovement.EnPassant;
+import com.example.backend.dto.pieceMovement.MakeMoveRequest;
 import com.example.backend.model.GameModel;
 import com.example.backend.repository.GameRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,9 +17,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -40,7 +46,6 @@ class GameControllerTest {
     @Autowired
     private GameRepository gameRepository;
 
-    private final GameRepository mockGameRepo = mock(GameRepository.class);
 
     @Test
     @DirtiesContext
@@ -113,8 +118,27 @@ class GameControllerTest {
         GameModel secondGame = GameModel.builder().playerOneId(ID_FIRST).playerTwoId(ID_THIRD).build();
 
         gameRepository.saveAll(List.of(firstGame, secondGame));
+
         mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE + "/doesGameExist/" + firstGame.getPlayerOneId() + "/" + firstGame.getPlayerTwoId()).with(mockUser()))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
+        List<GameModel> games = gameRepository.findAll();
+        assertEquals(2, gameRepository.count());
+        assertEquals(ID_FIRST, games.get(0).getPlayerOneId());
+        assertEquals(ID_SECOND, games.get(0).getPlayerTwoId());
+        assertEquals(ID_FIRST, games.get(1).getPlayerOneId());
+        assertEquals(ID_THIRD, games.get(1).getPlayerTwoId());
     }
 
+    @Test
+    @DirtiesContext
+    void doesGameExist_Fail() throws Exception {
+        GameModel firstGame = GameModel.builder().playerOneId(ID_FIRST).playerTwoId(ID_SECOND).build();
+
+        gameRepository.save(firstGame);
+        mockMvc.perform(MockMvcRequestBuilders.get(URL_BASE + "/doesGameExist/" + ID_FIRST + "/" + ID_THIRD).with(mockUser()))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").value(false));
+
+    }
 }
