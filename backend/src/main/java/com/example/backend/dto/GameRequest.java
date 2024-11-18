@@ -1,5 +1,6 @@
 package com.example.backend.dto;
 
+import com.example.backend.dto.pieceMovement.EnPassant;
 import com.example.backend.model.GameModel;
 import lombok.NonNull;
 
@@ -9,10 +10,11 @@ public record GameRequest(
 ) {
     public GameModel toModel() {
         return GameModel.builder()
-                .fenString("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq e3 0 1.")
+                .fenString("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
                 .playerOneId(playerOneId)
                 .playerTwoId(playerTwoId)
-                .hasTurn("w")
+                .isWhite(true)
+                .enPassant(new EnPassant("", ""))
                 .build();
     }
 }

@@ -1,7 +1,7 @@
 package com.example.backend.model;
 
 import lombok.*;
-import com.example.backend.model.Piece;
+import com.example.backend.model.Pieces.Piece;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

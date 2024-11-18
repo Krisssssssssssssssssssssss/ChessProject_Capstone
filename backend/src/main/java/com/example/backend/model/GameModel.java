@@ -1,5 +1,6 @@
 package com.example.backend.model;
 
+import com.example.backend.dto.pieceMovement.EnPassant;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,5 +17,6 @@ public class GameModel {
     private String fenString;
     private String playerOneId;
     private String playerTwoId;
-    private String hasTurn;
+    private boolean isWhite;
+    private EnPassant enPassant;
 }
