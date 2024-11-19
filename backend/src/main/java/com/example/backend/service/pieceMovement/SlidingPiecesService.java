@@ -33,20 +33,20 @@ public class SlidingPiecesService {
         }
         boolean canMove = false;
         switch (pieceToMove.getType().toLowerCase()) {
-            case "r" -> canMove = isRestrictedRook(board, sourceTile, targetTile, pieceToMove);
-            case "b" -> canMove = isRestrictedBishop(board, sourceTile, targetTile, pieceToMove);
-            case "q" -> canMove = isRestrictedQueen(board, sourceTile, targetTile, pieceToMove);
+            case "r" -> canMove = isAllowedRook(board, sourceTile, targetTile);
+            case "b" -> canMove = isAllowedBishop(board, sourceTile, targetTile);
+            case "q" -> canMove = isAllowedQueen(board, sourceTile, targetTile, pieceToMove);
             default -> throw new IllegalArgumentException("Unknown piece type: " + pieceToMove.getType());
         }
         return canMove;
     }
 
-    private static boolean isRestrictedRook(List<List<Tile>> board, Tile sourceTile, Tile targetTile, Piece pieceToMove) {
+    public static boolean isAllowedRook(List<List<Tile>> board, Tile sourceTile, Tile targetTile) {
         if ((sourceTile.getY() != targetTile.getY() && (sourceTile.getX() != targetTile.getX()))) {
             return false;
         }
-        int xSum = howManyFieldsStraightLine(sourceTile.getX(), targetTile.getX());
-        int ySum = howManyFieldsStraightLine(sourceTile.getY(), targetTile.getY());
+        int xSum = MajorPiecesHelperMethods.howManyFieldsMoved(sourceTile.getX(), targetTile.getX());
+        int ySum = MajorPiecesHelperMethods.howManyFieldsMoved(sourceTile.getY(), targetTile.getY());
         int xySumBigger;
         if (xSum > ySum) {
             xySumBigger = xSum;
@@ -56,9 +56,9 @@ public class SlidingPiecesService {
         return isJumpingOver;
     }
 
-    private static boolean isRestrictedBishop(List<List<Tile>> board, Tile sourceTile, Tile targetTile, Piece pieceToMove) {
-        int xSum = howManyFieldsDiagonally(sourceTile.getX(), targetTile.getX());
-        int ySum = howManyFieldsDiagonally(sourceTile.getY(), targetTile.getY());
+    public static boolean isAllowedBishop(List<List<Tile>> board, Tile sourceTile, Tile targetTile) {
+        int xSum = MajorPiecesHelperMethods.howManyFieldsMoved(sourceTile.getX(), targetTile.getX());
+        int ySum = MajorPiecesHelperMethods.howManyFieldsMoved(sourceTile.getY(), targetTile.getY());
         if (xSum != ySum) {
             return false;
         }
@@ -66,25 +66,10 @@ public class SlidingPiecesService {
         return isJumpingOver;
     }
 
-    private static boolean isRestrictedQueen(List<List<Tile>> board, Tile sourceTile, Tile targetTile, Piece pieceToMove) {
-        if (!isRestrictedRook(board, sourceTile, targetTile, pieceToMove) && !isRestrictedBishop(board, sourceTile, targetTile, pieceToMove)) {
+    private static boolean isAllowedQueen(List<List<Tile>> board, Tile sourceTile, Tile targetTile, Piece pieceToMove) {
+        if (!isAllowedRook(board, sourceTile, targetTile) && !isAllowedBishop(board, sourceTile, targetTile)) {
             return false;
         }
         return true;
-    }
-
-    private static int howManyFieldsDiagonally(int starting, int ending) {
-        if (starting > ending) {
-            return starting - ending;
-        } else {
-            return ending - starting;
-        }
-    }
-    private static int howManyFieldsStraightLine(int starting, int ending) {
-        if (starting > ending) {
-            return starting - ending;
-        } else {
-            return ending - starting;
-        }
     }
 }

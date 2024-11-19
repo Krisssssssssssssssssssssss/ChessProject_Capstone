@@ -148,4 +148,11 @@ public class MajorPiecesHelperMethods {
         }
         return true;
     }
+    public static int howManyFieldsMoved(int starting, int ending) {
+        if (starting > ending) {
+            return starting - ending;
+        } else {
+            return ending - starting;
+        }
+    }
 }
