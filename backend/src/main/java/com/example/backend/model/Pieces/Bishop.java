@@ -1,7 +1,7 @@
 package com.example.backend.model.Pieces;
 
 import com.example.backend.model.Tile;
-import com.example.backend.service.pieceMovement.SlidingPieces;
+import com.example.backend.service.pieceMovement.SlidingPiecesService;
 import lombok.*;
 
 import java.util.List;
@@ -13,6 +13,6 @@ import java.util.List;
 public class Bishop{
 
     public static boolean canMove(List<List<Tile>> board, String sourceSquare, String targetSquare){
-        return SlidingPieces.canMove(board, sourceSquare, targetSquare);
+        return SlidingPiecesService.canMove(board, sourceSquare, targetSquare);
     }
 }
