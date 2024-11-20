@@ -1,32 +1,13 @@
 package com.example.backend.service.pieceMovement;
 
+import com.example.backend.model.Piece;
 import com.example.backend.model.Tile;
 import com.example.backend.service.pieceMovement.helperMethods.MajorPiecesHelperMethods;
 
-import java.util.List;
-
 public class KnightService {
 
-    public static boolean canMove(List<List<Tile>> board, String sourceSquare, String targetSquare) {
-        Tile sourceTile = null;
-        Tile targetTile = null;
+    public static boolean canMove(Tile sourceTile, Tile targetTile, Piece pieceToMove) {
 
-        //Getting the sourceTile and the pieceToMove
-        for (List<Tile> row : board) {
-            for (Tile tile : row) {
-                if (tile.getName().equals(sourceSquare)) {
-                    sourceTile = tile;
-                }
-            }
-        }
-        //TargetTile
-        for (List<Tile> row : board) {
-            for (Tile tile : row) {
-                if (tile.getName().equals(targetSquare)) {
-                    targetTile = tile;
-                }
-            }
-        }
         int xSum = MajorPiecesHelperMethods.howManyFieldsMovedIndividualDirection(sourceTile.getX(), targetTile.getX());
         int ySum = MajorPiecesHelperMethods.howManyFieldsMovedIndividualDirection(sourceTile.getY(), targetTile.getY());
         //Should move in L shape
