@@ -10,35 +10,14 @@ import java.util.List;
 
 
 public class SlidingPiecesService {
-    public static boolean canMove(List<List<Tile>> board, String sourceSquare, String targetSquare) {
+    public static boolean canMove(List<List<Tile>> board, Tile sourceTile, Tile targetTile, Piece pieceToMove) {
 
-        Tile sourceTile = null;
-        Tile targetTile = null;
-        Piece pieceToMove = null;
-
-        //Getting the sourceTile and the pieceToMove
-        for (List<Tile> row : board) {
-            for (Tile tile : row) {
-                if (tile.getName().equals(sourceSquare)) {
-                    pieceToMove = tile.getPiece();
-                    sourceTile = tile;
-                }
-            }
-        }
-        //TargetTile
-        for (List<Tile> row : board) {
-            for (Tile tile : row) {
-                if (tile.getName().equals(targetSquare)) {
-                    targetTile = tile;
-                }
-            }
-        }
-        boolean canMove = false;
+        boolean canMove;
         switch (pieceToMove.getType().toLowerCase()) {
             case "r" -> canMove = isAllowedRook(board, sourceTile, targetTile);
             case "b" -> canMove = isAllowedBishop(board, sourceTile, targetTile);
             case "q" -> canMove = isAllowedQueen(board, sourceTile, targetTile, pieceToMove);
-            default -> throw new IllegalArgumentException("Unknown piece type: " + pieceToMove.getType());
+            default -> canMove = false;
         }
         return canMove;
     }
@@ -52,7 +31,8 @@ public class SlidingPiecesService {
 
         boolean isNotJumpingOver = MajorPiecesHelperMethods.isNotJumpingOver(board, sourceTile, targetTile, xySumBigger);
         if (isNotJumpingOver) {
-            if (sourceTile.getPiece().getColor() == "w") {
+            //Only set them as moved if it's their first move
+            if (sourceTile.getPiece().getColor().equals(StringConstants.WHITE.getCode())) {
                 if (sourceTile.getName().equals(StringConstants.ROOK_A1.getCode())) {
                     GameService.localCastling.setRookA1Moved(true);
                 }
@@ -60,7 +40,7 @@ public class SlidingPiecesService {
                     GameService.localCastling.setRookH1Moved(true);
                 }
             }
-            if (sourceTile.getPiece().getColor() == "b") {
+            if (sourceTile.getPiece().getColor().equals(StringConstants.BLACK.getCode())) {
                 if (sourceTile.getName().equals(StringConstants.ROOK_A8.getCode())) {
                     GameService.localCastling.setRookA8Moved(true);
                 }

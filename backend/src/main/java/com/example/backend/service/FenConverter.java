@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.constants.StringConstants;
 import com.example.backend.model.Tile;
 import com.example.backend.model.Piece;
 
@@ -89,8 +90,8 @@ public class FenConverter {
 
     private static Piece createPieceFromFenChar(char ch) {
         String type = String.valueOf(ch);
-        String color = Character.isUpperCase(ch) ? "w" : "b";
-        boolean isKing = type.equalsIgnoreCase("k");
+        String color = Character.isUpperCase(ch) ? StringConstants.WHITE.getCode() : StringConstants.BLACK.getCode();
+        boolean isKing = type.equalsIgnoreCase(StringConstants.KING.getCode());
 
         return new Piece(type, color, isKing);
     }

@@ -2,7 +2,6 @@ package com.example.backend.service.pieceMovement.helperMethods;
 
 import com.example.backend.constants.StringConstants;
 import com.example.backend.dto.pieceMovement.CastleResponse;
-import com.example.backend.model.CastlingModel;
 import com.example.backend.model.GameModel;
 import com.example.backend.model.Tile;
 
@@ -18,7 +17,7 @@ public class Castling {
             castleResponse.setCastlingModel(game.getCastlingModel());
             return castleResponse;
         }
-        if (sourceTile.getPiece().getColor() == StringConstants.WHITE.getCode()) {
+        if (sourceTile.getPiece().getColor() == StringConstants.WHITE.getCode() && !game.getCastlingModel().isWhiteKingMoved()) {
             if (castleResponse.getCastlingModel().isWhiteKingMoved()) {
                 castleResponse.setKingCanCastle(false);
                 castleResponse.setCastlingModel(game.getCastlingModel());
