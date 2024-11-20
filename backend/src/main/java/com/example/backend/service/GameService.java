@@ -84,62 +84,72 @@ public class GameService {
 
     public boolean isMoveAllowed(List<List<Tile>> board, String sourceSquare, String targetSquare, GameModel game) {
         boolean canMove = false;
-        Piece pieceToMove = null;
-        Tile sourceTile = null;
-        //Turn based movement
-        for (List<Tile> row : board) {
-            for (Tile tile : row) {
-                if (tile.getName().equals(sourceSquare)) {
-                    pieceToMove = tile.getPiece();
-                    sourceTile = tile;
-                    if ((pieceToMove.getColor().equals("w") && !game.isWhite()) ||
-                            (pieceToMove.getColor().equals("b") && game.isWhite())) {
-                        return false;
-                    }
-                }
+        Tile sourceTile = findTileAt(board, sourceSquare);
+        Tile targetTile = findTileAt(board, targetSquare);
+        Piece pieceToMove = sourceTile.getPiece();
+        Piece pieceToTake = targetTile.getPiece();
+
+        if (!isPlayerTurn(pieceToMove, game)) {
+            return false;
+        }
+        if (isIllegalCapture(sourceTile, targetTile)) {
+            return false;
+        }
+
+        return canPieceMove(pieceToMove, board, sourceTile, targetTile, game);
+
+    }
+    private  boolean canPieceMove (Piece pieceToMove, List<List<Tile>> board, Tile sourceTile, Tile targetTile, GameModel game) {
+        boolean canMove;
+        if (!pieceToMove.getType().toLowerCase().equals("p")) {
+            PawnService.enPassant = new EnPassant("", "");
+        }
+        if (sourceTile.getPiece().isKing()
+                && targetTile.getPiece().getType().equalsIgnoreCase("r")
+        ) {
+            CastleResponse castleResponse = Castling.canKingCastle(board, sourceTile, targetTile, game);
+            if (castleResponse.isKingCanCastle()) {
+                kingIsCastling = true;
+                localCastling = castleResponse.getCastlingModel();
+                return true;
             }
         }
-        //If it's their turn, is the move legal?
-        for (List<Tile> row : board) {
-            for (Tile tile : row) {
-                if (tile.getName().equals(targetSquare)) {
-                    Piece pieceToTake = tile.getPiece();
-                    //Don't allow to take same colour unless it's a castle
-                    if ((sourceTile.getPiece().getColor().equals(pieceToTake.getColor()))) {
-                        if (sourceTile.getPiece().isKing()
-                                && tile.getPiece().getType().equalsIgnoreCase("r")
-                        ) {
-                            CastleResponse castleResponse = Castling.canKingCastle(board, sourceTile, tile, game);
-                            if (castleResponse.isKingCanCastle()) {
-                                kingIsCastling = true;
-                                localCastling = castleResponse.getCastlingModel();
-                                return true;
-                            }
-                        } else {
-                            return false;
-                        }
-                    }
-                    if (!pieceToMove.getType().toLowerCase().equals("p")) {
-                        PawnService.enPassant = new EnPassant("", "");
-                    }
-                    switch (pieceToMove.getType().toLowerCase()) {
-                        case "p" -> canMove = Pawn.canMove(board, sourceSquare, targetSquare, game);
-                        case "n" -> canMove = Knight.canMove(board, sourceSquare, targetSquare);
-                        case "r" -> canMove = Rook.canMove(board, sourceSquare, targetSquare);
-                        case "q" -> canMove = Queen.canMove(board, sourceSquare, targetSquare);
-                        case "k" -> canMove = King.canMove(board, sourceSquare, targetSquare);
-                        case "b" -> canMove = Bishop.canMove(board, sourceSquare, targetSquare);
-                        default -> throw new IllegalArgumentException("Unknown piece type: " + pieceToMove.getType());
-                    }
-                }
-            }
 
+        switch (pieceToMove.getType().toLowerCase()) {
+            case "p" -> canMove = Pawn.canMove(board, sourceTile.getName(), targetTile.getName(), game);
+            case "n" -> canMove = Knight.canMove(board, sourceTile.getName(), targetTile.getName());
+            case "r" -> canMove = Rook.canMove(board, sourceTile.getName(), targetTile.getName());
+            case "q" -> canMove = Queen.canMove(board, sourceTile.getName(), targetTile.getName());
+            case "k" -> canMove = King.canMove(board, sourceTile.getName(), targetTile.getName());
+            case "b" -> canMove = Bishop.canMove(board, sourceTile.getName(), targetTile.getName());
+            default -> throw new IllegalArgumentException("Unknown piece type: " + pieceToMove.getType());
         }
         return canMove;
     }
 
-    private List<List<Tile>> executeTheMove(List<List<Tile>> board, String sourceSquare, String targetSquare) {
+    private boolean isIllegalCapture(Tile sourceTile, Tile targetTile) {
+        return sourceTile.getPiece().getColor().equals(targetTile.getPiece().getColor()) &&
+                !(sourceTile.getPiece().isKing() && targetTile.getPiece().getType().equalsIgnoreCase("r"));
+    }
 
+    private boolean isPlayerTurn(Piece piece, GameModel game) {
+        return (piece.getColor().equals("w") && game.isWhite()) || (piece.getColor().equals("b") && !game.isWhite());
+    }
+
+    private Tile findTileAt(List<List<Tile>> board, String sourceSquare) {
+        Tile result = null;
+        for (List<Tile> row : board) {
+            for (Tile tile : row) {
+                if (tile.getName().equals(sourceSquare)) {
+                    result = tile;
+                }
+            }
+        }
+        return result;
+    }
+
+
+    private List<List<Tile>> executeTheMove(List<List<Tile>> board, String sourceSquare, String targetSquare) {
         if (kingIsCastling) {
             return handleCastlingMove(board, sourceSquare, targetSquare);
 
