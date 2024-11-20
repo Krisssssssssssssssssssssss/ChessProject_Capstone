@@ -8,10 +8,13 @@ import com.example.backend.exception.GameNotFoundException;
 import com.example.backend.exception.UserAlreadyExistsException;
 import com.example.backend.model.CastlingModel;
 import com.example.backend.model.GameModel;
-import com.example.backend.model.Pieces.*;
+import com.example.backend.model.Piece;
 import com.example.backend.model.Tile;
 import com.example.backend.repository.GameRepository;
+import com.example.backend.service.pieceMovement.KingService;
+import com.example.backend.service.pieceMovement.KnightService;
 import com.example.backend.service.pieceMovement.PawnService;
+import com.example.backend.service.pieceMovement.SlidingPiecesService;
 import com.example.backend.service.pieceMovement.helperMethods.Castling;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -101,7 +104,7 @@ public class GameService {
     }
     private  boolean canPieceMove (Piece pieceToMove, List<List<Tile>> board, Tile sourceTile, Tile targetTile, GameModel game) {
         boolean canMove;
-        if (!pieceToMove.getType().toLowerCase().equals("p")) {
+        if (!pieceToMove.getType().toLowerCase().equals(StringConstants.PAWN.getCode())) {
             PawnService.enPassant = new EnPassant("", "");
         }
         if (sourceTile.getPiece().isKing()
@@ -116,12 +119,10 @@ public class GameService {
         }
 
         switch (pieceToMove.getType().toLowerCase()) {
-            case "p" -> canMove = Pawn.canMove(board, sourceTile.getName(), targetTile.getName(), game);
-            case "n" -> canMove = Knight.canMove(board, sourceTile.getName(), targetTile.getName());
-            case "r" -> canMove = Rook.canMove(board, sourceTile.getName(), targetTile.getName());
-            case "q" -> canMove = Queen.canMove(board, sourceTile.getName(), targetTile.getName());
-            case "k" -> canMove = King.canMove(board, sourceTile.getName(), targetTile.getName());
-            case "b" -> canMove = Bishop.canMove(board, sourceTile.getName(), targetTile.getName());
+            case "p" -> canMove = PawnService.canMove(sourceTile, targetTile, pieceToMove, game);
+            case "n" -> canMove = KnightService.canMove(sourceTile, targetTile, pieceToMove);
+            case "r", "q", "b" -> canMove = SlidingPiecesService.canMove(board, sourceTile.getName(), targetTile.getName());
+            case "k" -> canMove = KingService.canMove(board, sourceTile.getName(), targetTile.getName());
             default -> throw new IllegalArgumentException("Unknown piece type: " + pieceToMove.getType());
         }
         return canMove;
@@ -133,7 +134,7 @@ public class GameService {
     }
 
     private boolean isPlayerTurn(Piece piece, GameModel game) {
-        return (piece.getColor().equals("w") && game.isWhite()) || (piece.getColor().equals("b") && !game.isWhite());
+        return (piece.getColor().equals(StringConstants.WHITE.getCode()) && game.isWhite()) || (piece.getColor().equals(StringConstants.BLACK.getCode()) && !game.isWhite());
     }
 
     private Tile findTileAt(List<List<Tile>> board, String sourceSquare) {

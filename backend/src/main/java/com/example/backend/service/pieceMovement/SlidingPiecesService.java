@@ -1,7 +1,7 @@
 package com.example.backend.service.pieceMovement;
 
 import com.example.backend.constants.StringConstants;
-import com.example.backend.model.Pieces.*;
+import com.example.backend.model.Piece;
 import com.example.backend.model.Tile;
 import com.example.backend.service.GameService;
 import com.example.backend.service.pieceMovement.helperMethods.MajorPiecesHelperMethods;

@@ -2,7 +2,7 @@ package com.example.backend.service.pieceMovement.helperMethods;
 
 import com.example.backend.dto.pieceMovement.EnPassant;
 import com.example.backend.model.GameModel;
-import com.example.backend.model.Pieces.Piece;
+import com.example.backend.model.Piece;
 import com.example.backend.model.Tile;
 import com.example.backend.service.pieceMovement.PawnService;
 
