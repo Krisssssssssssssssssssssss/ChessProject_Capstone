@@ -1,6 +1,7 @@
 package com.example.backend.dto;
 
 import com.example.backend.dto.pieceMovement.EnPassant;
+import com.example.backend.model.CastlingModel;
 import com.example.backend.model.GameModel;
 import lombok.NonNull;
 
@@ -15,6 +16,7 @@ public record GameRequest(
                 .playerTwoId(playerTwoId)
                 .isWhite(true)
                 .enPassant(new EnPassant("", ""))
+                .castlingModel(new CastlingModel(false, false, false, false, false, false, ""))
                 .build();
     }
 }

@@ -1,7 +1,9 @@
 package com.example.backend.service.pieceMovement;
 
+import com.example.backend.constants.StringConstants;
 import com.example.backend.model.Pieces.*;
 import com.example.backend.model.Tile;
+import com.example.backend.service.pieceMovement.helperMethods.Castling;
 import com.example.backend.service.pieceMovement.helperMethods.MajorPiecesHelperMethods;
 
 import java.util.List;
@@ -45,20 +47,34 @@ public class SlidingPiecesService {
         if ((sourceTile.getY() != targetTile.getY() && (sourceTile.getX() != targetTile.getX()))) {
             return false;
         }
-        int xSum = MajorPiecesHelperMethods.howManyFieldsMoved(sourceTile.getX(), targetTile.getX());
-        int ySum = MajorPiecesHelperMethods.howManyFieldsMoved(sourceTile.getY(), targetTile.getY());
-        int xySumBigger;
-        if (xSum > ySum) {
-            xySumBigger = xSum;
+
+        int xySumBigger = MajorPiecesHelperMethods.howManyTilesMoved(sourceTile, targetTile);
+
+        boolean isNotJumpingOver = MajorPiecesHelperMethods.isNotJumpingOver(board, sourceTile, targetTile, xySumBigger);
+        if (isNotJumpingOver) {
+            if (sourceTile.getPiece().getColor() == "w") {
+                if (sourceTile.getName().equals(StringConstants.ROOK_A1.getCode())) {
+                    Castling.localCastling.setRookA1Moved(true);
+                }
+                if (sourceTile.getName().equals(StringConstants.ROOK_H1.getCode())) {
+                    Castling.localCastling.setRookH1Moved(true);
+                }
+            }
+            if (sourceTile.getPiece().getColor() == "b") {
+                if (targetTile.getName().equals(StringConstants.ROOK_A8.getCode())) {
+                    Castling.localCastling.setRookA8Moved(true);
+                }
+                if (targetTile.getName().equals(StringConstants.ROOK_H8.getCode())) {
+                    Castling.localCastling.setRookH1Moved(true);
+                }
+            }
         }
-        else {xySumBigger = ySum;}
-        boolean isJumpingOver = MajorPiecesHelperMethods.isJumpingOverStraightLine(board, sourceTile, targetTile, xySumBigger);
-        return isJumpingOver;
+        return isNotJumpingOver;
     }
 
     public static boolean isAllowedBishop(List<List<Tile>> board, Tile sourceTile, Tile targetTile) {
-        int xSum = MajorPiecesHelperMethods.howManyFieldsMoved(sourceTile.getX(), targetTile.getX());
-        int ySum = MajorPiecesHelperMethods.howManyFieldsMoved(sourceTile.getY(), targetTile.getY());
+        int xSum = MajorPiecesHelperMethods.howManyFieldsMovedIndividualDirection(sourceTile.getX(), targetTile.getX());
+        int ySum = MajorPiecesHelperMethods.howManyFieldsMovedIndividualDirection(sourceTile.getY(), targetTile.getY());
         if (xSum != ySum) {
             return false;
         }

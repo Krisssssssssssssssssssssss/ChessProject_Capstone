@@ -27,9 +27,9 @@ public class KnightService {
                 }
             }
         }
-        int xSum = MajorPiecesHelperMethods.howManyFieldsMoved(sourceTile.getX(), targetTile.getX());
-        int ySum = MajorPiecesHelperMethods.howManyFieldsMoved(sourceTile.getY(), targetTile.getY());
-        //Should not move more than 2 squares in any direction
+        int xSum = MajorPiecesHelperMethods.howManyFieldsMovedIndividualDirection(sourceTile.getX(), targetTile.getX());
+        int ySum = MajorPiecesHelperMethods.howManyFieldsMovedIndividualDirection(sourceTile.getY(), targetTile.getY());
+        //Should move in L shape
         if (!((xSum == 2 && ySum == 1) || (xSum == 1 && ySum == 2))) {
             return false;
         }

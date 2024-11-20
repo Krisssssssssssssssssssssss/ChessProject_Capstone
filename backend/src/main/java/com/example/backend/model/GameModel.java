@@ -19,4 +19,5 @@ public class GameModel {
     private String playerTwoId;
     private boolean isWhite;
     private EnPassant enPassant;
+    private CastlingModel castlingModel;
 }
