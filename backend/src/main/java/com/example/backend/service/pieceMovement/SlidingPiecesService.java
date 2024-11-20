@@ -3,7 +3,7 @@ package com.example.backend.service.pieceMovement;
 import com.example.backend.constants.StringConstants;
 import com.example.backend.model.Pieces.*;
 import com.example.backend.model.Tile;
-import com.example.backend.service.pieceMovement.helperMethods.Castling;
+import com.example.backend.service.GameService;
 import com.example.backend.service.pieceMovement.helperMethods.MajorPiecesHelperMethods;
 
 import java.util.List;
@@ -54,18 +54,18 @@ public class SlidingPiecesService {
         if (isNotJumpingOver) {
             if (sourceTile.getPiece().getColor() == "w") {
                 if (sourceTile.getName().equals(StringConstants.ROOK_A1.getCode())) {
-                    Castling.localCastling.setRookA1Moved(true);
+                    GameService.localCastling.setRookA1Moved(true);
                 }
                 if (sourceTile.getName().equals(StringConstants.ROOK_H1.getCode())) {
-                    Castling.localCastling.setRookH1Moved(true);
+                    GameService.localCastling.setRookH1Moved(true);
                 }
             }
             if (sourceTile.getPiece().getColor() == "b") {
-                if (targetTile.getName().equals(StringConstants.ROOK_A8.getCode())) {
-                    Castling.localCastling.setRookA8Moved(true);
+                if (sourceTile.getName().equals(StringConstants.ROOK_A8.getCode())) {
+                    GameService.localCastling.setRookA8Moved(true);
                 }
-                if (targetTile.getName().equals(StringConstants.ROOK_H8.getCode())) {
-                    Castling.localCastling.setRookH1Moved(true);
+                if (sourceTile.getName().equals(StringConstants.ROOK_H8.getCode())) {
+                    GameService.localCastling.setRookH8Moved(true);
                 }
             }
         }

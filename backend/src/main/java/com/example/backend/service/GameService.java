@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.constants.StringConstants;
+import com.example.backend.dto.pieceMovement.CastleResponse;
 import com.example.backend.dto.pieceMovement.EnPassant;
 import com.example.backend.dto.pieceMovement.MakeMoveRequest;
 import com.example.backend.exception.GameNotFoundException;
@@ -23,6 +24,8 @@ import java.util.Optional;
 public class GameService {
     private final GameRepository gameRepository;
     private final IdService idService;
+    private static boolean kingIsCastling = false;
+    public static CastlingModel localCastling;
 
     public GameModel createGame(GameModel gameModel) throws Exception {
         Optional<GameModel> existingGame = gameRepository.findGameByPlayerOneIdAndPlayerTwoId(gameModel.getPlayerOneId(), gameModel.getPlayerTwoId());
@@ -46,7 +49,7 @@ public class GameService {
 
     public String makeMove(MakeMoveRequest makeMoveRequest) {
         GameModel game = this.getGame(makeMoveRequest.playerOneId(), makeMoveRequest.playerTwoId());
-        Castling.localCastling = game.getCastlingModel();
+        localCastling = game.getCastlingModel();
         List<List<Tile>> gameBoard = FenConverter.toBoardArray(game.getFenString());
         boolean isMoveAllowed = isMoveAllowed(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare(), game);
         if (isMoveAllowed) {
@@ -55,10 +58,10 @@ public class GameService {
             game.setFenString(editedFen);
             game.setWhite(!game.isWhite());
             game.setEnPassant(PawnService.enPassant);
-            game.setCastlingModel(Castling.localCastling);
+            game.setCastlingModel(localCastling);
             gameRepository.save(game);
             PawnService.enPassant = new EnPassant("", "");
-            Castling.kingIsCastling = false;
+            kingIsCastling = false;
             return editedFen;
         } else {
             return game.getFenString();
@@ -92,7 +95,12 @@ public class GameService {
                         if (sourceTile.getPiece().isKing()
                                 && tile.getPiece().getType().equalsIgnoreCase("r")
                         ) {
-                            return Castling.canKingCastle(board, sourceTile, tile, game);
+                            CastleResponse castleResponse = Castling.canKingCastle(board, sourceTile, tile, game);
+                            if (castleResponse.isKingCanCastle()){
+                                kingIsCastling = true;
+                                localCastling = castleResponse.getCastlingModel();
+                                return true;
+                            }
                         } else {
                             return false;
                         }
@@ -120,8 +128,8 @@ public class GameService {
 
         Piece pieceToMove = null;
 
-        if (Castling.kingIsCastling) {
-            String rookToDisplace = Castling.localCastling.getCastlingActivity();
+        if (kingIsCastling) {
+            String rookToDisplace = localCastling.getCastlingActivity();
             Piece king = null;
             Piece rook = null;
             String kingLocation = "";
