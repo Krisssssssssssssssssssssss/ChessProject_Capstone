@@ -48,25 +48,39 @@ public class GameService {
     }
 
     public String makeMove(MakeMoveRequest makeMoveRequest) {
-        GameModel game = this.getGame(makeMoveRequest.playerOneId(), makeMoveRequest.playerTwoId());
+        GameModel game = fetchGame(makeMoveRequest.playerOneId(), makeMoveRequest.playerTwoId());
         localCastling = game.getCastlingModel();
         List<List<Tile>> gameBoard = FenConverter.toBoardArray(game.getFenString());
-        boolean isMoveAllowed = isMoveAllowed(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare(), game);
-        if (isMoveAllowed) {
-            gameBoard = this.executeTheMove(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare());
-            String editedFen = FenConverter.toFen(gameBoard);
-            game.setFenString(editedFen);
-            game.setWhite(!game.isWhite());
-            game.setEnPassant(PawnService.enPassant);
-            game.setCastlingModel(localCastling);
-            gameRepository.save(game);
-            PawnService.enPassant = new EnPassant("", "");
-            kingIsCastling = false;
-            return editedFen;
-        } else {
+
+        if (!isMoveAllowed(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare(), game)) {
             return game.getFenString();
         }
+
+        String updatedFen = updateGameState(game, gameBoard, makeMoveRequest);
+        gameRepository.save(game);
+        resetTemporaryStates();
+        return updatedFen;
     }
+
+    private GameModel fetchGame(String playerOneId, String playerTwoId) {
+        return this.getGame(playerOneId, playerTwoId);
+    }
+
+    private String updateGameState(GameModel game, List<List<Tile>> gameBoard, MakeMoveRequest makeMoveRequest) {
+        gameBoard = executeTheMove(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare());
+        String fenString = FenConverter.toFen(gameBoard);
+        game.setFenString(fenString);
+        game.setWhite(!game.isWhite());
+        game.setEnPassant(PawnService.enPassant);
+        game.setCastlingModel(localCastling);
+        return fenString;
+    }
+
+    private void resetTemporaryStates() {
+        PawnService.enPassant = new EnPassant("", "");
+        kingIsCastling = false;
+    }
+
 
     public boolean isMoveAllowed(List<List<Tile>> board, String sourceSquare, String targetSquare, GameModel game) {
         boolean canMove = false;
@@ -96,7 +110,7 @@ public class GameService {
                                 && tile.getPiece().getType().equalsIgnoreCase("r")
                         ) {
                             CastleResponse castleResponse = Castling.canKingCastle(board, sourceTile, tile, game);
-                            if (castleResponse.isKingCanCastle()){
+                            if (castleResponse.isKingCanCastle()) {
                                 kingIsCastling = true;
                                 localCastling = castleResponse.getCastlingModel();
                                 return true;
@@ -126,93 +140,102 @@ public class GameService {
 
     private List<List<Tile>> executeTheMove(List<List<Tile>> board, String sourceSquare, String targetSquare) {
 
-        Piece pieceToMove = null;
-
         if (kingIsCastling) {
-            String rookToDisplace = localCastling.getCastlingActivity();
-            Piece king = null;
-            Piece rook = null;
-            String kingLocation = "";
-            String rookLocation = "";
-
-            if (rookToDisplace.equals(StringConstants.ROOK_A1.getCode())){
-                king = new Piece("K", "w", true);
-                rook = new Piece("R", "w", false);
-                kingLocation = "c1";
-                rookLocation = "d1";
-            }
-            if (rookToDisplace.equals(StringConstants.ROOK_H1.getCode())){
-                king = new Piece("K", "w", true);
-                rook = new Piece("R", "w", false);
-                kingLocation = "g1";
-                rookLocation = "f1";
-            }
-            if (rookToDisplace.equals(StringConstants.ROOK_A8.getCode())){
-                king = new Piece("k", "b", true);
-                rook = new Piece("r", "b", false);
-                kingLocation = "c8";
-                rookLocation = "d8";
-            }
-            if (rookToDisplace.equals(StringConstants.ROOK_H8.getCode())){
-                king = new Piece("k", "b", true);
-                rook = new Piece("r", "b", false);
-                kingLocation = "g8";
-                rookLocation = "f8";
-            }
-            for (List<Tile> row : board) {
-                for (Tile tile : row) {
-                    if(tile.getName().equals(kingLocation) && kingLocation != "") {
-                        tile.setOccupied(true);
-                        tile.setPiece(new Piece(king.getType(), king.getColor(), king.isKing()));
-                    }
-                    if(tile.getName().equals(rookLocation) && rookLocation != "") {
-                        tile.setOccupied(true);
-                        tile.setPiece(new Piece(rook.getType(), rook.getColor(), rook.isKing()));
-                    }
-                    if (tile.getName().equals(targetSquare)) {
-                        tile.setOccupied(false);
-                        tile.setPiece(new Piece("", "", false));
-                    }
-                    if (tile.getName().equals(sourceSquare)) {
-                        tile.setOccupied(false);
-                        tile.setPiece(new Piece("", "", false));
-                    }
-                }
-            }
+            return handleCastlingMove(board, sourceSquare, targetSquare);
 
         } else {
+            return handleStandardMove(board, sourceSquare, targetSquare);
+        }
+    }
+
+    private List<List<Tile>> handleCastlingMove(List<List<Tile>> board, String sourceSquare, String targetSquare) {
+        String rookToDisplace = localCastling.getCastlingActivity();
+        Piece king = null;
+        Piece rook = null;
+        String kingLocation = "";
+        String rookLocation = "";
+
+        if (rookToDisplace.equals(StringConstants.ROOK_A1.getCode())) {
+            king = new Piece("K", "w", true);
+            rook = new Piece("R", "w", false);
+            kingLocation = "c1";
+            rookLocation = "d1";
+        }
+        if (rookToDisplace.equals(StringConstants.ROOK_H1.getCode())) {
+            king = new Piece("K", "w", true);
+            rook = new Piece("R", "w", false);
+            kingLocation = "g1";
+            rookLocation = "f1";
+        }
+        if (rookToDisplace.equals(StringConstants.ROOK_A8.getCode())) {
+            king = new Piece("k", "b", true);
+            rook = new Piece("r", "b", false);
+            kingLocation = "c8";
+            rookLocation = "d8";
+        }
+        if (rookToDisplace.equals(StringConstants.ROOK_H8.getCode())) {
+            king = new Piece("k", "b", true);
+            rook = new Piece("r", "b", false);
+            kingLocation = "g8";
+            rookLocation = "f8";
+        }
+        for (
+                List<Tile> row : board) {
+            for (Tile tile : row) {
+                if (tile.getName().equals(kingLocation) && kingLocation != "") {
+                    tile.setOccupied(true);
+                    tile.setPiece(new Piece(king.getType(), king.getColor(), king.isKing()));
+                }
+                if (tile.getName().equals(rookLocation) && rookLocation != "") {
+                    tile.setOccupied(true);
+                    tile.setPiece(new Piece(rook.getType(), rook.getColor(), rook.isKing()));
+                }
+                if (tile.getName().equals(targetSquare)) {
+                    tile.setOccupied(false);
+                    tile.setPiece(new Piece("", "", false));
+                }
+                if (tile.getName().equals(sourceSquare)) {
+                    tile.setOccupied(false);
+                    tile.setPiece(new Piece("", "", false));
+                }
+            }
+        }
+        return board;
+    }
+
+    private List<List<Tile>> handleStandardMove(List<List<Tile>> board, String sourceSquare, String targetSquare) {
+        Piece pieceToMove = null;
+        for (List<Tile> row : board) {
+            for (Tile tile : row) {
+                if (tile.getName().equals(sourceSquare)) {
+                    pieceToMove = tile.getPiece();
+                    tile.setOccupied(false);
+                    tile.setPiece(new Piece("", "", false));
+                    break;
+                }
+                if (pieceToMove != null) {
+                    break;
+                }
+            }
+        }
+        //Tile the piece lands at
+        for (List<Tile> row : board) {
+            for (Tile tile : row) {
+                if (tile.getName().equals(targetSquare)) {
+                    tile.setOccupied(true);
+                    tile.setPiece(pieceToMove);
+                    break;
+                }
+            }
+        }
+        //Special scenario: enPassant
+        if (PawnService.isEnPassant) {
             for (List<Tile> row : board) {
                 for (Tile tile : row) {
-                    if (tile.getName().equals(sourceSquare)) {
-                        pieceToMove = tile.getPiece();
+                    if (tile.getName().equals(PawnService.enPassant.fieldFigureToRemove())) {
                         tile.setOccupied(false);
                         tile.setPiece(new Piece("", "", false));
                         break;
-                    }
-                    if (pieceToMove != null) {
-                        break;
-                    }
-                }
-            }
-            //Tile the piece lands at
-            for (List<Tile> row : board) {
-                for (Tile tile : row) {
-                    if (tile.getName().equals(targetSquare)) {
-                        tile.setOccupied(true);
-                        tile.setPiece(pieceToMove);
-                        break;
-                    }
-                }
-            }
-            //Special scenario: enPassant
-            if (PawnService.isEnPassant) {
-                for (List<Tile> row : board) {
-                    for (Tile tile : row) {
-                        if (tile.getName().equals(PawnService.enPassant.fieldFigureToRemove())) {
-                            tile.setOccupied(false);
-                            tile.setPiece(new Piece("", "", false));
-                            break;
-                        }
                     }
                 }
             }
