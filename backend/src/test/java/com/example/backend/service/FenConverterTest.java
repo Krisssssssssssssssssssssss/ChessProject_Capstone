@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.model.Pieces.Piece;
+import com.example.backend.model.Piece;
 import com.example.backend.model.Tile;
 import org.junit.jupiter.api.Test;
 

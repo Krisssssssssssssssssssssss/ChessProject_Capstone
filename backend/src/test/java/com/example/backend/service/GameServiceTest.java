@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.pieceMovement.MakeMoveRequest;
+import com.example.backend.dto.piece_movement.MakeMoveRequest;
 import com.example.backend.exception.GameNotFoundException;
 import com.example.backend.exception.UserAlreadyExistsException;
 import com.example.backend.model.GameModel;
@@ -12,6 +12,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mockStatic;
+
+import org.mockito.MockedStatic;
 
 class GameServiceTest {
 
@@ -19,7 +22,6 @@ class GameServiceTest {
     private static final String ID_SECOND = "Jane";
 
     private final GameRepository mockGameRepo = mock(GameRepository.class);
-    private final GameService mockGameService = mock(GameService.class);
     private final IdService idService = new IdService();
 
     @Test
@@ -107,7 +109,7 @@ class GameServiceTest {
     @Test
     @DirtiesContext
     void makeMove_isMoveAllowed_True() throws Exception {
-        GameModel expectedGame = GameModel.builder()
+        GameModel initialGame = GameModel.builder()
                 .playerOneId(ID_FIRST)
                 .playerTwoId(ID_SECOND)
                 .fenString("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
@@ -123,25 +125,39 @@ class GameServiceTest {
 
         String updatedFen = "rnbqkbnr/1ppppppp/p7/8/8/8/PPPPPPPP/RNBQKBNR";
 
+        GameModel updatedGame = GameModel.builder()
+                .playerOneId(ID_FIRST)
+                .playerTwoId(ID_SECOND)
+                .fenString(updatedFen)
+                .isWhite(false) // After move, Black to move
+                .build();
+
         when(mockGameRepo.findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND))
-                .thenReturn(Optional.of(expectedGame));
+                .thenReturn(Optional.of(initialGame));
         when(mockGameRepo.save(any(GameModel.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        GameService gameService = spy(new GameService(mockGameRepo, idService));
+        // Mock the static methods in GameServiceHelpers
+        try (MockedStatic<GameServiceHelper> mockedHelpers = mockStatic(GameServiceHelper.class)) {
+            mockedHelpers.when(() -> GameServiceHelper.isMoveAllowed(any(), any(), any(), any()))
+                    .thenReturn(true);
+            mockedHelpers.when(() -> GameServiceHelper.updateGameState(any(), any(), any()))
+                    .thenReturn(updatedGame);
 
-        doReturn(true).when(gameService).isMoveAllowed(any(), any(), any(), any());
+            GameService gameService = new GameService(mockGameRepo, idService);
 
-        String resultFen = gameService.makeMove(mockMakeMoveRequest);
+            String resultFen = gameService.makeMove(mockMakeMoveRequest);
 
-        verify(mockGameRepo).findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND);
-        verify(mockGameRepo).save(any(GameModel.class));
-        assertEquals(updatedFen, resultFen);
+            verify(mockGameRepo).findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND);
+            verify(mockGameRepo).save(any(GameModel.class));
+            assertEquals(updatedFen, resultFen);
+        }
     }
+
 
     @Test
     @DirtiesContext
-    void makeMove_sMoveAllowed_False() throws Exception {
+    void makeMove_isMoveAllowed_False() {
         GameModel expectedGame = GameModel.builder()
                 .playerOneId(ID_FIRST)
                 .playerTwoId(ID_SECOND)
@@ -159,15 +175,19 @@ class GameServiceTest {
         when(mockGameRepo.findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND))
                 .thenReturn(Optional.of(expectedGame));
 
-        GameService gameService = spy(new GameService(mockGameRepo, idService));
+        // Mock the static GameServiceHelpers.isMoveAllowed method
+        try (MockedStatic<GameServiceHelper> mockedHelpers = mockStatic(GameServiceHelper.class)) {
+            mockedHelpers.when(() -> GameServiceHelper.isMoveAllowed(any(), any(), any(), any()))
+                    .thenReturn(false);
 
-        doReturn(false).when(gameService).isMoveAllowed(any(), any(), any(), any());
+            GameService gameService = new GameService(mockGameRepo, idService);
 
-        String resultFen = gameService.makeMove(mockMakeMoveRequest);
+            String resultFen = gameService.makeMove(mockMakeMoveRequest);
 
-        verify(mockGameRepo).findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND);
-        verify(mockGameRepo, never()).save(any(GameModel.class));
-        assertEquals("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", resultFen);
+            verify(mockGameRepo).findGameByPlayerOneIdAndPlayerTwoId(ID_FIRST, ID_SECOND);
+            verify(mockGameRepo, never()).save(any(GameModel.class));
+            assertEquals("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR", resultFen);
+        }
     }
 
     @Test

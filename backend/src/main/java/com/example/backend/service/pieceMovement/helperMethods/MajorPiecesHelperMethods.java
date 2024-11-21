@@ -5,7 +5,7 @@ import com.example.backend.model.Tile;
 import java.util.List;
 
 public class MajorPiecesHelperMethods {
-    public static boolean isJumpingOverStraightLine(List<List<Tile>> board, Tile sourceTile, Tile targetTile, int xySum) {
+    public static boolean isNotJumpingOver(List<List<Tile>> board, Tile sourceTile, Tile targetTile, int xySum) {
         boolean isXchanging = false;
         boolean isXincreasing = false;
         boolean isYincreasing = false;
@@ -148,7 +148,18 @@ public class MajorPiecesHelperMethods {
         }
         return true;
     }
-    public static int howManyFieldsMoved(int starting, int ending) {
+    public static int howManyTilesMoved(Tile sourceTile, Tile targetTile) {
+        int xSum = howManyFieldsMovedIndividualDirection(sourceTile.getX(), targetTile.getX());
+        int ySum = howManyFieldsMovedIndividualDirection(sourceTile.getY(), targetTile.getY());
+        int xySumBigger;
+        if (xSum > ySum) {
+            xySumBigger = xSum;
+        }
+        else {xySumBigger = ySum;}
+        return xySumBigger;
+    }
+
+    public static int howManyFieldsMovedIndividualDirection(int starting, int ending) {
         if (starting > ending) {
             return starting - ending;
         } else {

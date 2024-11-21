@@ -1,19 +1,18 @@
 package com.example.backend.service.pieceMovement;
 
-import com.example.backend.model.Piece;
 import com.example.backend.model.Tile;
 import com.example.backend.service.pieceMovement.helperMethods.MajorPiecesHelperMethods;
 
-public class KnightService {
+import java.util.List;
 
-    public static boolean canMove(Tile sourceTile, Tile targetTile, Piece pieceToMove) {
-
+public class BishopService {
+    public static boolean canMove(List<List<Tile>> board, Tile sourceTile, Tile targetTile) {
         int xSum = MajorPiecesHelperMethods.howManyFieldsMovedIndividualDirection(sourceTile.getX(), targetTile.getX());
         int ySum = MajorPiecesHelperMethods.howManyFieldsMovedIndividualDirection(sourceTile.getY(), targetTile.getY());
-        //Should move in L shape
-        if (!((xSum == 2 && ySum == 1) || (xSum == 1 && ySum == 2))) {
+        if (xSum != ySum) {
             return false;
         }
-        return true;
+        boolean isJumpingOver = MajorPiecesHelperMethods.isJumpingOverDiagonally(board, sourceTile, targetTile, xSum);
+        return isJumpingOver;
     }
 }

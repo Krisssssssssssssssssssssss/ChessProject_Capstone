@@ -1,9 +1,6 @@
-package com.example.backend.model.Pieces;
+package com.example.backend.model;
 
-import com.example.backend.model.Tile;
 import lombok.*;
-
-import java.util.List;
 
 @Data
 @AllArgsConstructor
