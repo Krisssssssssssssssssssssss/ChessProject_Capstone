@@ -138,10 +138,10 @@ class GameServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // Mock the static methods in GameServiceHelpers
-        try (MockedStatic<GameServiceHelpers> mockedHelpers = mockStatic(GameServiceHelpers.class)) {
-            mockedHelpers.when(() -> GameServiceHelpers.isMoveAllowed(any(), any(), any(), any()))
+        try (MockedStatic<GameServiceHelper> mockedHelpers = mockStatic(GameServiceHelper.class)) {
+            mockedHelpers.when(() -> GameServiceHelper.isMoveAllowed(any(), any(), any(), any()))
                     .thenReturn(true);
-            mockedHelpers.when(() -> GameServiceHelpers.updateGameState(any(), any(), any()))
+            mockedHelpers.when(() -> GameServiceHelper.updateGameState(any(), any(), any()))
                     .thenReturn(updatedGame);
 
             GameService gameService = new GameService(mockGameRepo, idService);
@@ -157,7 +157,7 @@ class GameServiceTest {
 
     @Test
     @DirtiesContext
-    void makeMove_isMoveAllowed_False() throws Exception {
+    void makeMove_isMoveAllowed_False() {
         GameModel expectedGame = GameModel.builder()
                 .playerOneId(ID_FIRST)
                 .playerTwoId(ID_SECOND)
@@ -176,8 +176,8 @@ class GameServiceTest {
                 .thenReturn(Optional.of(expectedGame));
 
         // Mock the static GameServiceHelpers.isMoveAllowed method
-        try (MockedStatic<GameServiceHelpers> mockedHelpers = mockStatic(GameServiceHelpers.class)) {
-            mockedHelpers.when(() -> GameServiceHelpers.isMoveAllowed(any(), any(), any(), any()))
+        try (MockedStatic<GameServiceHelper> mockedHelpers = mockStatic(GameServiceHelper.class)) {
+            mockedHelpers.when(() -> GameServiceHelper.isMoveAllowed(any(), any(), any(), any()))
                     .thenReturn(false);
 
             GameService gameService = new GameService(mockGameRepo, idService);

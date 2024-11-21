@@ -46,13 +46,13 @@ public class GameService {
         localCastling = game.getCastlingModel();
         List<List<Tile>> gameBoard = FenConverter.toBoardArray(game.getFenString());
 
-        if (!GameServiceHelpers.isMoveAllowed(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare(), game)) {
+        if (!GameServiceHelper.isMoveAllowed(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare(), game)) {
             return game.getFenString();
         }
 
-        GameModel updatedGame = GameServiceHelpers.updateGameState(game, gameBoard, makeMoveRequest);
+        GameModel updatedGame = GameServiceHelper.updateGameState(game, gameBoard, makeMoveRequest);
         gameRepository.save(updatedGame);
-        GameServiceHelpers.resetTemporaryStates();
+        GameServiceHelper.resetTemporaryStates();
         return updatedGame.getFenString();
     }
     private GameModel fetchGame(String playerOneId, String playerTwoId) {

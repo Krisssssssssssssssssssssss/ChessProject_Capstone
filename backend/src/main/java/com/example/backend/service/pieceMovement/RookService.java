@@ -1,13 +1,13 @@
-package com.example.backend.service;
+package com.example.backend.service.pieceMovement;
 
 import com.example.backend.constants.StringConstants;
-import com.example.backend.model.Piece;
 import com.example.backend.model.Tile;
+import com.example.backend.service.GameService;
 import com.example.backend.service.pieceMovement.helperMethods.MajorPiecesHelperMethods;
 
 import java.util.List;
 
-public class RookServices {
+public class RookService {
     public static boolean canMove(List<List<Tile>> board, Tile sourceTile, Tile targetTile) {
         if (!isInSameRowOrColumn(sourceTile, targetTile)) {
             return false;

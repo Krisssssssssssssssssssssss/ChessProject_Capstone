@@ -8,6 +8,10 @@ import com.example.backend.model.Tile;
 import java.util.List;
 
 public class Castling {
+    //Also SonarCloud suggestion to protect against instantiating
+    private Castling() {
+        throw new UnsupportedOperationException("Castling is a utility class and cannot be instantiated.");
+    }
     public static CastleResponse canKingCastle(List<List<Tile>> board, Tile sourceTile, Tile targetTile, GameModel game) {
         CastleResponse castleResponse = new CastleResponse(false, game.getCastlingModel());
         int tilesMoved = MajorPiecesHelperMethods.howManyTilesMoved(sourceTile, targetTile);

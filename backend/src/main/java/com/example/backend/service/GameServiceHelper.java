@@ -8,18 +8,15 @@ import com.example.backend.model.CastlingModel;
 import com.example.backend.model.GameModel;
 import com.example.backend.model.Piece;
 import com.example.backend.model.Tile;
-import com.example.backend.service.pieceMovement.KingService;
-import com.example.backend.service.pieceMovement.KnightService;
-import com.example.backend.service.pieceMovement.PawnService;
-import com.example.backend.service.pieceMovement.SlidingPiecesService;
+import com.example.backend.service.pieceMovement.*;
 import com.example.backend.service.pieceMovement.helperMethods.Castling;
 
 import java.util.List;
 
-public class GameServiceHelpers {
+public class GameServiceHelper {
 
     //Sonar cloud suggestion
-    private GameServiceHelpers() {
+    private GameServiceHelper() {
         throw new UnsupportedOperationException("GameServiceHelpers is a utility class and cannot be instantiated.");
     }
 
@@ -78,9 +75,9 @@ public class GameServiceHelpers {
         switch (pieceToMove.getType().toLowerCase()) {
             case "p" -> canMove = PawnService.canMove(sourceTile, targetTile, pieceToMove, game);
             case "n" -> canMove = KnightService.canMove(sourceTile, targetTile, pieceToMove);
-            case "r" -> canMove = RookServices.canMove(board, sourceTile, targetTile);
-            case "q" -> canMove = SlidingPiecesService.canMove(board, sourceTile, targetTile, pieceToMove);
-            case "b" -> canMove = SlidingPiecesService.canMove(board, sourceTile, targetTile, pieceToMove);
+            case "r" -> canMove = RookService.canMove(board, sourceTile, targetTile);
+            case "b" -> canMove = BishopService.canMove(board, sourceTile, targetTile);
+            case "q" -> canMove = QueenService.canMove(board, sourceTile, targetTile, pieceToMove);
             case "k" -> canMove = KingService.canMove(sourceTile, targetTile);
             default -> canMove = false;
         }
