@@ -2,6 +2,7 @@ package com.example.backend.service.pieceMovement.helperMethods;
 
 import com.example.backend.constants.StringConstants;
 import com.example.backend.dto.piece_movement.CastleResponse;
+import com.example.backend.model.CastlingModel;
 import com.example.backend.model.GameModel;
 import com.example.backend.model.Tile;
 
@@ -12,65 +13,79 @@ public class Castling {
     private Castling() {
         throw new UnsupportedOperationException("Castling is a utility class and cannot be instantiated.");
     }
+
     public static CastleResponse canKingCastle(List<List<Tile>> board, Tile sourceTile, Tile targetTile, GameModel game) {
+
         CastleResponse castleResponse = new CastleResponse(false, game.getCastlingModel());
-        int tilesMoved = MajorPiecesHelperMethods.howManyTilesMoved(sourceTile, targetTile);
-        boolean isNotJumpingOver = MajorPiecesHelperMethods.isNotJumpingOver(board, sourceTile, targetTile, tilesMoved);
-        if (!isNotJumpingOver) {
-            castleResponse.setKingCanCastle(false);
-            castleResponse.setCastlingModel(game.getCastlingModel());
+
+        if (!canMoveWithoutJumpingOver(board, sourceTile, targetTile)) {
             return castleResponse;
         }
-        if (sourceTile.getPiece().getColor() == StringConstants.WHITE.getCode() && !game.getCastlingModel().isWhiteKingMoved()) {
-            if (castleResponse.getCastlingModel().isWhiteKingMoved()) {
-                castleResponse.setKingCanCastle(false);
-                castleResponse.setCastlingModel(game.getCastlingModel());
-                return castleResponse;
-            }
-            if (targetTile.getName().equals(StringConstants.ROOK_A1.getCode())) {
-                if (castleResponse.getCastlingModel().isRookA1Moved()) {
-                    castleResponse.setKingCanCastle(false);
-                    castleResponse.setCastlingModel(game.getCastlingModel());
-                    return castleResponse;
-                }
-                castleResponse.getCastlingModel().setCastlingActivity(StringConstants.ROOK_A1.getCode());
-            }
+        String pieceColor = sourceTile.getPiece().getColor();
+        if (pieceColor.equals(StringConstants.WHITE.getCode())) {
+            return processWhiteKingCastle(targetTile, castleResponse);
+        } else if (pieceColor.equals(StringConstants.BLACK.getCode())) {
+            return processBlackKingCastle(targetTile, castleResponse);
+        }
 
-            if (targetTile.getName().equals(StringConstants.ROOK_H1.getCode())) {
-                if (castleResponse.getCastlingModel().isRookH1Moved()) {
-                    castleResponse.setKingCanCastle(false);
-                    castleResponse.setCastlingModel(game.getCastlingModel());
-                    return castleResponse;
-                }
-                castleResponse.getCastlingModel().setCastlingActivity(StringConstants.ROOK_H1.getCode());
-            }
-            castleResponse.getCastlingModel().setWhiteKingMoved(true);
-        }
-        if (sourceTile.getPiece().getColor() == StringConstants.BLACK.getCode()) {
-            if (castleResponse.getCastlingModel().isBlackKingMoved()) {
-                castleResponse.setKingCanCastle(false);
-                castleResponse.setCastlingModel(game.getCastlingModel());
-                return castleResponse;
-            }
-            if (targetTile.getName().equals(StringConstants.ROOK_A8.getCode())) {
-                if (castleResponse.getCastlingModel().isRookA8Moved()){
-                    castleResponse.setKingCanCastle(false);
-                    castleResponse.setCastlingModel(game.getCastlingModel());
-                    return castleResponse;
-                }
-                castleResponse.getCastlingModel().setCastlingActivity(StringConstants.ROOK_A8.getCode());
-            }
-            if (targetTile.getName().equals(StringConstants.ROOK_H8.getCode())) {
-                if (castleResponse.getCastlingModel().isRookH8Moved()) {
-                    castleResponse.setKingCanCastle(false);
-                    castleResponse.setCastlingModel(game.getCastlingModel());
-                    return castleResponse;
-                }
-                castleResponse.getCastlingModel().setCastlingActivity(StringConstants.ROOK_H8.getCode());
-            }
-            castleResponse.getCastlingModel().setBlackKingMoved(true);
-        }
-        castleResponse.setKingCanCastle(true);
         return castleResponse;
+
+    }
+
+    private static boolean canMoveWithoutJumpingOver(List<List<Tile>> board, Tile sourceTile, Tile targetTile) {
+        int tilesMoved = MajorPiecesHelperMethods.howManyTilesMoved(sourceTile, targetTile);
+        return MajorPiecesHelperMethods.isNotJumpingOver(board, sourceTile, targetTile, tilesMoved);
+    }
+
+    private static CastleResponse processWhiteKingCastle(Tile targetTile, CastleResponse castleResponse) {
+        CastlingModel castlingModel = castleResponse.getCastlingModel();
+        if (castlingModel.isWhiteKingMoved()) {
+            return castleResponse;
+        }
+
+        if (updateCastlingWhite(targetTile, castlingModel, StringConstants.ROOK_A1.getCode(), StringConstants.ROOK_H1.getCode())) {
+            castlingModel.setWhiteKingMoved(true);
+            castleResponse.setKingCanCastle(true);
+        }
+
+        return castleResponse;
+    }
+
+    private static CastleResponse processBlackKingCastle(Tile targetTile, CastleResponse castleResponse) {
+        CastlingModel castlingModel = castleResponse.getCastlingModel();
+        if (castlingModel.isBlackKingMoved()) {
+            return castleResponse;
+        }
+
+        if (updateCastlingBlack(targetTile, castlingModel, StringConstants.ROOK_A8.getCode(), StringConstants.ROOK_H8.getCode())) {
+            castlingModel.setBlackKingMoved(true);
+            castleResponse.setKingCanCastle(true);
+        }
+
+        return castleResponse;
+    }
+
+    private static boolean updateCastlingWhite(Tile targetTile, CastlingModel castlingModel, String rookA, String rookH) {
+        if (targetTile.getName().equals(rookA) && !castlingModel.isRookA1Moved()) {
+            castlingModel.setCastlingActivity(rookA);
+            return true;
+        }
+        if (targetTile.getName().equals(rookH) && !castlingModel.isRookH1Moved()) {
+            castlingModel.setCastlingActivity(rookH);
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean updateCastlingBlack(Tile targetTile, CastlingModel castlingModel, String rookA, String rookH) {
+        if (targetTile.getName().equals(rookA) && !castlingModel.isRookA8Moved()) {
+            castlingModel.setCastlingActivity(rookA);
+            return true;
+        }
+        if (targetTile.getName().equals(rookH) && !castlingModel.isRookH8Moved()) {
+            castlingModel.setCastlingActivity(rookH);
+            return true;
+        }
+        return false;
     }
 }
