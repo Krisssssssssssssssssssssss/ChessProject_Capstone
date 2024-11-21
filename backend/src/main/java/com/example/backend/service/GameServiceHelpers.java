@@ -78,7 +78,9 @@ public class GameServiceHelpers {
         switch (pieceToMove.getType().toLowerCase()) {
             case "p" -> canMove = PawnService.canMove(sourceTile, targetTile, pieceToMove, game);
             case "n" -> canMove = KnightService.canMove(sourceTile, targetTile, pieceToMove);
-            case "r", "q", "b" -> canMove = SlidingPiecesService.canMove(board, sourceTile, targetTile, pieceToMove);
+            case "r" -> canMove = RookServices.canMove(board, sourceTile, targetTile);
+            case "q" -> canMove = SlidingPiecesService.canMove(board, sourceTile, targetTile, pieceToMove);
+            case "b" -> canMove = SlidingPiecesService.canMove(board, sourceTile, targetTile, pieceToMove);
             case "k" -> canMove = KingService.canMove(sourceTile, targetTile);
             default -> canMove = false;
         }
