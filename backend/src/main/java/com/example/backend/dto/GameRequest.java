@@ -1,6 +1,6 @@
 package com.example.backend.dto;
 
-import com.example.backend.dto.pieceMovement.EnPassant;
+import com.example.backend.dto.piece_movement.EnPassant;
 import com.example.backend.model.CastlingModel;
 import com.example.backend.model.GameModel;
 import lombok.NonNull;

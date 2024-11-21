@@ -1,4 +1,4 @@
-package com.example.backend.dto.pieceMovement;
+package com.example.backend.dto.piece_movement;
 
 import com.example.backend.model.CastlingModel;
 import lombok.*;

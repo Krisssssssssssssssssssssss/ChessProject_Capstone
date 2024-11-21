@@ -1,7 +1,7 @@
 package com.example.backend.service.pieceMovement.helperMethods;
 
 import com.example.backend.constants.StringConstants;
-import com.example.backend.dto.pieceMovement.CastleResponse;
+import com.example.backend.dto.piece_movement.CastleResponse;
 import com.example.backend.model.GameModel;
 import com.example.backend.model.Tile;
 

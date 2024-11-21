@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.pieceMovement.MakeMoveRequest;
+import com.example.backend.dto.piece_movement.MakeMoveRequest;
 import com.example.backend.exception.GameNotFoundException;
 import com.example.backend.exception.UserAlreadyExistsException;
 import com.example.backend.model.CastlingModel;

@@ -1,9 +1,10 @@
 package com.example.backend.service;
 
 import com.example.backend.constants.StringConstants;
-import com.example.backend.dto.pieceMovement.CastleResponse;
-import com.example.backend.dto.pieceMovement.EnPassant;
-import com.example.backend.dto.pieceMovement.MakeMoveRequest;
+import com.example.backend.dto.piece_movement.CastleResponse;
+import com.example.backend.dto.piece_movement.EnPassant;
+import com.example.backend.dto.piece_movement.MakeMoveRequest;
+import com.example.backend.model.CastlingModel;
 import com.example.backend.model.GameModel;
 import com.example.backend.model.Piece;
 import com.example.backend.model.Tile;
@@ -17,6 +18,10 @@ import java.util.List;
 
 public class GameServiceHelpers {
 
+    //Sonar cloud suggestion
+    private GameServiceHelpers() {
+        throw new UnsupportedOperationException("GameServiceHelpers is a utility class and cannot be instantiated.");
+    }
 
     public static GameModel updateGameState(GameModel game, List<List<Tile>> gameBoard, MakeMoveRequest makeMoveRequest) {
         gameBoard = executeTheMove(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare());
@@ -81,13 +86,13 @@ public class GameServiceHelpers {
     }
 
     public static boolean isThatKingAlreadyCastled(Piece pieceToMove, GameModel game) {
-        if (pieceToMove.getColor().equals(StringConstants.WHITE.getCode()) && game.getCastlingModel().isWhiteKingMoved()) {
-            return true;
-        } else if (pieceToMove.getColor().equals(StringConstants.BLACK.getCode()) && game.getCastlingModel().isBlackKingMoved()) {
-            return true;
-        }
-        return false;
+        String pieceColor = pieceToMove.getColor();
+        CastlingModel castlingModel = game.getCastlingModel();
+
+        return (pieceColor.equals(StringConstants.WHITE.getCode()) && castlingModel.isWhiteKingMoved()) ||
+                (pieceColor.equals(StringConstants.BLACK.getCode()) && castlingModel.isBlackKingMoved());
     }
+
 
     public static boolean isIllegalCapture(Tile sourceTile, Tile targetTile) {
         return sourceTile.getPiece().getColor().equals(targetTile.getPiece().getColor()) &&
@@ -154,11 +159,11 @@ public class GameServiceHelpers {
         for (
                 List<Tile> row : board) {
             for (Tile tile : row) {
-                if (tile.getName().equals(kingLocation) && kingLocation != "") {
+                if (tile.getName().equals(kingLocation) && !kingLocation.equals("")) {
                     tile.setOccupied(true);
                     tile.setPiece(new Piece(king.getType(), king.getColor(), king.isKing()));
                 }
-                if (tile.getName().equals(rookLocation) && rookLocation != "") {
+                if (tile.getName().equals(rookLocation) && !rookLocation.equals("")) {
                     tile.setOccupied(true);
                     tile.setPiece(new Piece(rook.getType(), rook.getColor(), rook.isKing()));
                 }
@@ -176,43 +181,45 @@ public class GameServiceHelpers {
     }
 
     public static List<List<Tile>> handleStandardMove(List<List<Tile>> board, String sourceSquare, String targetSquare) {
-        Piece pieceToMove = null;
-        for (List<Tile> row : board) {
-            for (Tile tile : row) {
-                if (tile.getName().equals(sourceSquare)) {
-                    pieceToMove = tile.getPiece();
-                    tile.setOccupied(false);
-                    tile.setPiece(new Piece("", "", false));
-                    break;
-                }
-                if (pieceToMove != null) {
-                    break;
-                }
-            }
-        }
+        //Remove the piece from the tile it moves away from
+        Piece pieceToMove = removePieceFromTile(board, sourceSquare);
+
         //Tile the piece lands at
-        for (List<Tile> row : board) {
-            for (Tile tile : row) {
-                if (tile.getName().equals(targetSquare)) {
-                    tile.setOccupied(true);
-                    tile.setPiece(pieceToMove);
-                    break;
-                }
-            }
+        if (pieceToMove != null) {
+            placePieceOnTile(board, targetSquare, pieceToMove);
         }
         //Special scenario: enPassant
         if (PawnService.isEnPassant) {
-            for (List<Tile> row : board) {
-                for (Tile tile : row) {
-                    if (tile.getName().equals(PawnService.enPassant.fieldFigureToRemove())) {
-                        tile.setOccupied(false);
-                        tile.setPiece(new Piece("", "", false));
-                        break;
-                    }
+            removePieceFromTile(board, PawnService.enPassant.fieldFigureToRemove());
+        }
+
+        return board;
+    }
+
+    private static Piece removePieceFromTile(List<List<Tile>> board, String tileName) {
+        for (List<Tile> row : board) {
+            for (Tile tile : row) {
+                if (tile.getName().equals(tileName)) {
+                    Piece pieceToMove = tile.getPiece();
+                    tile.setOccupied(false);
+                    tile.setPiece(new Piece("", "", false));
+                    return pieceToMove;
                 }
             }
         }
-        return board;
+        return null;
+    }
+
+    private static void placePieceOnTile(List<List<Tile>> board, String tileName, Piece pieceToMove) {
+        for (List<Tile> row : board) {
+            for (Tile tile : row) {
+                if (tile.getName().equals(tileName)) {
+                    tile.setOccupied(true);
+                    tile.setPiece(pieceToMove);
+                    return;
+                }
+            }
+        }
     }
 
 }

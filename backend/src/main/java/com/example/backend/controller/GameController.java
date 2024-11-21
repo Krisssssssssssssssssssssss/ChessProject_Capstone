@@ -2,7 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.GameRequest;
 import com.example.backend.dto.GameResponse;
-import com.example.backend.dto.pieceMovement.MakeMoveRequest;
+import com.example.backend.dto.piece_movement.MakeMoveRequest;
 import com.example.backend.model.GameModel;
 import com.example.backend.service.GameService;
 import lombok.AllArgsConstructor;
