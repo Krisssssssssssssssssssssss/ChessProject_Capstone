@@ -3,6 +3,7 @@ package com.example.backend.service;
 import com.example.backend.constants.StringConstants;
 import com.example.backend.dto.piece_movement.CastleResponse;
 import com.example.backend.dto.piece_movement.EnPassant;
+import com.example.backend.dto.piece_movement.KingAndThreats;
 import com.example.backend.dto.piece_movement.MakeMoveRequest;
 import com.example.backend.model.CastlingModel;
 import com.example.backend.model.GameModel;
@@ -10,7 +11,9 @@ import com.example.backend.model.Piece;
 import com.example.backend.model.Tile;
 import com.example.backend.service.pieceMovement.*;
 import com.example.backend.service.pieceMovement.helperMethods.Castling;
+import com.example.backend.service.pieceMovement.helperMethods.PawnHelperMethods;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GameServiceHelper {
@@ -20,8 +23,12 @@ public class GameServiceHelper {
         throw new UnsupportedOperationException("GameServiceHelpers is a utility class and cannot be instantiated.");
     }
 
+
     public static GameModel updateGameState(GameModel game, List<List<Tile>> gameBoard, MakeMoveRequest makeMoveRequest) {
         gameBoard = executeTheMove(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare());
+        if(!isKingSafe(gameBoard,game)) {
+            return null;
+        }
         String fenString = FenConverter.toFen(gameBoard);
         game.setFenString(fenString);
         game.setWhite(!game.isWhite());
@@ -82,6 +89,52 @@ public class GameServiceHelper {
             default -> canMove = false;
         }
         return canMove;
+    }
+
+    public static boolean isKingSafe(List<List<Tile>> board, GameModel game) {
+        KingAndThreats kingAndThreats = new KingAndThreats(null, new ArrayList<>());
+
+        //It is reversed logic and !isWhite when we want to check if it is white, because we are passing
+        //  the updated board with the move already made, so the move is automatically flipped to the black
+        if (game.isWhite()) { //should be seen as isWhite
+            findKingPositionAndPotentialThreat(board, StringConstants.BLACK.getCode(), StringConstants.WHITE.getCode(), kingAndThreats);
+            return checkKingSafe(board, kingAndThreats, game);
+        } else {
+            findKingPositionAndPotentialThreat(board, StringConstants.WHITE.getCode(), StringConstants.BLACK.getCode(), kingAndThreats);
+            return checkKingSafe(board, kingAndThreats, game);
+        }
+    }
+
+    private static void findKingPositionAndPotentialThreat(List<List<Tile>> board, String threateningColour, String kingsColour, KingAndThreats kingAndThreats) {
+        for (List<Tile> row : board) {
+            for (Tile tile : row) {
+                if (tile.isOccupied() && tile.getPiece().getColor().equals(threateningColour)) {
+                    kingAndThreats.getOpposingPieces().add(tile);
+                }
+                if (tile.getPiece().isKing() && tile.getPiece().getColor().equals(kingsColour)) {
+                    kingAndThreats.setKingsTile(tile);
+                }
+            }
+        }
+    }
+
+    private static boolean checkKingSafe(List<List<Tile>> board, KingAndThreats kingAndThreats, GameModel game) {
+        boolean canMove;
+        for (Tile opposingTile : kingAndThreats.getOpposingPieces()) {
+            switch (opposingTile.getPiece().getType().toLowerCase()) {
+                case "p" -> canMove = PawnHelperMethods.simulatedCanMove(opposingTile, kingAndThreats.getKingsTile(), opposingTile.getPiece(), game);
+                case "n" -> canMove = KnightService.canMove(opposingTile, kingAndThreats.getKingsTile(), opposingTile.getPiece());
+                case "r" -> canMove = RookService.canMove(board, opposingTile, kingAndThreats.getKingsTile());
+                case "b" -> canMove = BishopService.canMove(board, opposingTile, kingAndThreats.getKingsTile());
+                case "q" -> canMove = QueenService.canMove(board, opposingTile, kingAndThreats.getKingsTile(), opposingTile.getPiece());
+                case "k" -> canMove = KingService.canMove(opposingTile, kingAndThreats.getKingsTile());
+                default ->  canMove = false;
+            }
+            if (canMove) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static boolean isThatKingAlreadyCastled(Piece pieceToMove, GameModel game) {

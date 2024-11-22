@@ -51,6 +51,9 @@ public class GameService {
         }
 
         GameModel updatedGame = GameServiceHelper.updateGameState(game, gameBoard, makeMoveRequest);
+        if (updatedGame == null) {
+            return game.getFenString();
+        }
         gameRepository.save(updatedGame);
         GameServiceHelper.resetTemporaryStates();
         return updatedGame.getFenString();
