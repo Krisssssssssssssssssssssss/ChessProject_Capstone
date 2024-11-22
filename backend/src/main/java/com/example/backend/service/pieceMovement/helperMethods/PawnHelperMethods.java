@@ -90,6 +90,7 @@ public class PawnHelperMethods {
     ///Simulation for when we check if the king is potentially under Check,
     /// The current logic already restarts the enPassant if it takes place, so this move will always
     /// return false, even though it was an actual correct enPassant
+    /// TODO: re-edit this, because there is a lot of duplicate
     public static boolean simulatedCanMove(Tile sourceTile, Tile targetTile, Piece pieceToMove, GameModel game) {
         int howManyYFieldsMoved = 0;
         //can't kill forwards
