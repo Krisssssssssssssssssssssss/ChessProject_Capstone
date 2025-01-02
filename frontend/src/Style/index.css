@@ -60,15 +60,11 @@ button:focus-visible {
   font-size: 25px;
 }
 
-@media (prefers-color-scheme: light) {
+@media (min-width: 1200px) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
+    background-color: #222831;
   }
   button {
-    background-color: #f9f9f9;
+    color: rgba(255, 255, 255, 0.87);
   }
 }
