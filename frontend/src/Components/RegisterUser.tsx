@@ -1,25 +1,35 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterUser() {
-    const [name, setName] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-
+    const [name, setName] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [confirmPassword, setConfirmPassword] = useState<string>('');
+    const [error, setError] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
 
     const navigate = useNavigate();
     const handleNavigate = () => {
         navigate("/");
     };
 
+    const isValidUsername = (username: string): boolean => {
+        const minLength = 6;
+        const hasUpperCase = /[A-Z]/.test(username);
+        const hasLowerCase = /[a-z]/.test(username);
+        return username.length >= minLength && hasUpperCase && hasLowerCase;
+    };
 
-    const handleSubmit = async (e: { preventDefault: () => void; }) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
         setSuccessMessage('');
+
+        if (!isValidUsername(name)) {
+            setError("Username must be at least 6 characters long and include both uppercase and lowercase letters.");
+            return;
+        }
 
         if (password !== confirmPassword) {
             setError("Passwords do not match.");
@@ -39,9 +49,7 @@ export default function RegisterUser() {
             setName('');
             setPassword('');
             setConfirmPassword('');
-        } catch (err) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+        } catch (err: any) {
             if (err.response && err.response.status === 409) {
                 console.log("Error: Username already exists");
                 setError("Username already exists. Please choose a different username.");
@@ -66,7 +74,7 @@ export default function RegisterUser() {
                             required
                         />
                     </label>
-                    <br/>
+                    <br />
                     <label>
                         Password:
                         <input
@@ -76,7 +84,7 @@ export default function RegisterUser() {
                             required
                         />
                     </label>
-                    <br/>
+                    <br />
                     <label>
                         Confirm Password:
                         <input
@@ -86,9 +94,9 @@ export default function RegisterUser() {
                             required
                         />
                     </label>
-                    <br/>
-                    {error && <p style={{color: 'red'}}>{error}</p>}
-                    {successMessage && <p style={{color: 'green'}}>{successMessage}</p>}
+                    <br />
+                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
                     <button type="submit">Register</button>
                 </form>
             </div>
@@ -100,7 +108,7 @@ export default function RegisterUser() {
                        onKeyDown={(e) => {
                            if (e.key === 'Enter') handleNavigate();
                        }}
-                       role="button" > here </a>
+                       role="button"> here </a>
                     to go to the login page
                 </p>
             </div>
