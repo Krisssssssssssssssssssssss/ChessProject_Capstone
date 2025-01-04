@@ -155,7 +155,7 @@ export default function Login({userName, setUserName, user, setUser}: LoginProps
                             required
                         />
 
-                        <button type="button" onClick={() => handleLogin(false)}>Login</button>
+                        <button type="submit" onClick={() => handleLogin(false)}>Login</button>
                     </form>
                     <button type="button" onClick={() => handleLogin(true)}>Login with GitHub <i
                         className="fa-brands fa-github"></i></button>
