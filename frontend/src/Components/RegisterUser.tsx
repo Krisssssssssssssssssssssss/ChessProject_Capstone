@@ -14,11 +14,11 @@ export default function RegisterUser() {
         navigate("/");
     };
 
-    const isValidUsername = (username: string): boolean => {
+    const isValidPassword = (password: string): boolean => {
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
         const minLength = 6;
-        const hasUpperCase = /[A-Z]/.test(username);
-        const hasLowerCase = /[a-z]/.test(username);
-        return username.length >= minLength && hasUpperCase && hasLowerCase;
+        return password.length >= minLength && hasUpperCase && hasLowerCase;
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -26,8 +26,8 @@ export default function RegisterUser() {
         setError('');
         setSuccessMessage('');
 
-        if (!isValidUsername(name)) {
-            setError("Username must be at least 6 characters long and include both uppercase and lowercase letters.");
+        if (!isValidPassword(password)) {
+            setError("Password must be at least 6 characters long and include both uppercase and lowercase letters.");
             return;
         }
 
