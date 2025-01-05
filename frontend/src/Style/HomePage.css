@@ -69,5 +69,9 @@
     scrollbar-width: thin;
     scrollbar-color: #222831 #393E46;
 }
-
+.error-message {
+    font-size: small;
+    color: #ff2e63;
+    margin-top: 15px;
+}
 

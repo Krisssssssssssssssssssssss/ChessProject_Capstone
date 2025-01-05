@@ -14,12 +14,12 @@ interface LoginProps {
 export default function Login({userName, setUserName, user, setUser}: LoginProps) {
     const [userInputValue, setUserInputValue] = useState("");
     const [passwordInputValue, setPasswordInputValue] = useState('');
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const navigate = useNavigate();
 
     const navigateToRegisterPage = () => {
         navigate("/register");
     };
-
 
     const loadUser = () => {
         axios.get('/api/auth/me')
@@ -32,14 +32,13 @@ export default function Login({userName, setUserName, user, setUser}: LoginProps
             });
     };
 
-    const handleLogin = (isGitHubUser : boolean) => {
+    const handleLogin = (isGitHubUser: boolean) => {
         if (isGitHubUser) {
-            handleLoginGitHub()
-        }
-        else {
+            handleLoginGitHub();
+        } else {
             handleLoginDatabase();
         }
-    }
+    };
 
     const handleLoginGitHub = () => {
         const host = window.location.host === 'localhost:5173' ? 'http://localhost:8080' : window.location.origin;
@@ -83,10 +82,10 @@ export default function Login({userName, setUserName, user, setUser}: LoginProps
                 navigate("/home");
             }
         } catch (error) {
+            setErrorMessage("Login failed. Please check your username and password."); // Set error message
             console.error("Login failed: ", error);
         }
     };
-
 
     const generateRandomPassword = (length: number) => {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
@@ -123,10 +122,9 @@ export default function Login({userName, setUserName, user, setUser}: LoginProps
         }
     }, [userName]);
 
-
     useEffect(() => {
-        if(userName){
-            navigate("/home")
+        if (userName) {
+            navigate("/home");
         }
         loadUser();
     }, []);
@@ -154,12 +152,11 @@ export default function Login({userName, setUserName, user, setUser}: LoginProps
                             onChange={(e) => setPasswordInputValue(e.target.value)}
                             required
                         />
-
                         <button type="submit" onClick={() => handleLogin(false)}>Login</button>
                     </form>
                     <button type="button" onClick={() => handleLogin(true)}>Login with GitHub <i
                         className="fa-brands fa-github"></i></button>
-
+                    {errorMessage && <div className="error-message">{errorMessage}</div>}
                 </div>
                 <div className="noAccount_PleaseRegister">
                     <p>Don't have an account yet? Click

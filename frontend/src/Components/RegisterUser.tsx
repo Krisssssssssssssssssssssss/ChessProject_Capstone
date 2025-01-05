@@ -95,7 +95,7 @@ export default function RegisterUser() {
                         />
                     </label>
                     <br />
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {error && <p style={{ color: '#ff2e63' }}>{error}</p>}
                     {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
                     <button type="submit">Register</button>
                 </form>
