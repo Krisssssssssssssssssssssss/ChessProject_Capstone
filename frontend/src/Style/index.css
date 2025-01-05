@@ -45,6 +45,7 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
   margin-top: 20px;
+  color: rgba(255, 255, 255, 0.87);
 }
 button:hover {
   border-color: #00ADB5;
@@ -58,13 +59,4 @@ button:focus-visible {
 }
 .fa-github {
   font-size: 25px;
-}
-
-@media (min-width: 1200px) {
-  :root {
-    background-color: #222831;
-  }
-  button {
-    color: rgba(255, 255, 255, 0.87);
-  }
 }
