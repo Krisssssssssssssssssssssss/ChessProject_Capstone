@@ -84,7 +84,7 @@ export default function Admin({ selectedUser, setSelectedUser, setAllUsers, user
         navigate("/home");
     };
 
-    if (!editedUser) return <p>Select the player you want to manage</p>;
+    if (!editedUser) return <p>Click the icon of the user you want to manage</p>;
 
     return (
         <div className="main_inner">

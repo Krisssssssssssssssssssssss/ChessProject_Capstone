@@ -87,7 +87,7 @@ export default function Player({currentUser, selectedUser}: PlayerProps) {
 
                     </div>
                 ) : (
-                    <p className="select-player-text">Select a player you want to play against!</p>
+                    <p className="select-player-text">Click the icon of the player you want to play against!</p>
                 )}
             </div>
 
