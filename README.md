@@ -1,3 +1,5 @@
+![Chess](https://github.com/user-attachments/assets/34bce289-504a-48d7-92db-d19606c9235b)
+
 # Welcome to My Chess Game! ♟️
 
 Hey you! 🎉\
