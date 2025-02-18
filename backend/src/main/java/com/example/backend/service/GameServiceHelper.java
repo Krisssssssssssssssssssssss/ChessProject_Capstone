@@ -26,6 +26,7 @@ public class GameServiceHelper {
 
     public static GameModel updateGameState(GameModel game, List<List<Tile>> gameBoard, MakeMoveRequest makeMoveRequest) {
         gameBoard = executeTheMove(gameBoard, makeMoveRequest.sourceSquare(), makeMoveRequest.targetSquare());
+        // we execute the move and check if the King actively lands in a position where he's checked
         if(!isKingSafe(gameBoard,game)) {
             return null;
         }
@@ -49,6 +50,7 @@ public class GameServiceHelper {
         Tile targetTile = findTileAt(board, targetSquare);
         Piece pieceToMove = sourceTile.getPiece();
 
+        //Is the player moving white/black and the piece itself white/black
         if (!isPlayerTurn(pieceToMove, game)) {
             return false;
         }
@@ -62,13 +64,16 @@ public class GameServiceHelper {
 
     public static boolean canPieceMove(Piece pieceToMove, List<List<Tile>> board, Tile sourceTile, Tile targetTile, GameModel game) {
         boolean canMove;
+        //if not a pawn = reset enPassant
         if (!pieceToMove.getType().toLowerCase().equals(StringConstants.PAWN.getCode())) {
             PawnService.enPassant = new EnPassant("", "");
         }
+//        TODO: TEST potential bug with if the king is not castled but has to take opposing Rook
         if (sourceTile.getPiece().isKing()
                 && targetTile.getPiece().getType().equalsIgnoreCase("r")
         ) {
             if (isThatKingAlreadyCastled(pieceToMove, game)) {
+                //TODO: do a test in the UI, if bug = make a colour miss-match check between the king and the rook
                 return false;
             }
             CastleResponse castleResponse = Castling.canKingCastle(board, sourceTile, targetTile, game);
@@ -105,6 +110,7 @@ public class GameServiceHelper {
         }
     }
 
+    // This one finds where the king is located and sets a list of all opposing pieces
     private static void findKingPositionAndPotentialThreat(List<List<Tile>> board, String threateningColour, String kingsColour, KingAndThreats kingAndThreats) {
         for (List<Tile> row : board) {
             for (Tile tile : row) {
@@ -118,6 +124,7 @@ public class GameServiceHelper {
         }
     }
 
+    // kingAndThreats passes the kings possition and the possition of all opposing pieces. We check if any piece can land on the kings field
     private static boolean checkKingSafe(List<List<Tile>> board, KingAndThreats kingAndThreats, GameModel game) {
         boolean canMove;
         for (Tile opposingTile : kingAndThreats.getOpposingPieces()) {

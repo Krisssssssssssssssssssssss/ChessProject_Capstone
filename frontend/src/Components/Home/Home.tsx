@@ -30,6 +30,7 @@ export default function Home({ user, setUser, setUserName }: HomeProps) {
         }
     };
 
+    // in case the admin updated a user, the users are being fetched again
     useEffect(() => {
         axios.get<UserResponse[]>("/api/users")
             .then((result) => setAllUsers(result.data))
